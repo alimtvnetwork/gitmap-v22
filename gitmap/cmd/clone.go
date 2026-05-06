@@ -211,8 +211,16 @@ func isDirectURL(source string) bool {
 }
 
 // repoNameFromURL derives the repository name from a clone URL.
+//
+// Trailing slashes (and backslashes) are stripped first so URLs like
+// `https://github.com/owner/repo/` or `git@host:owner/repo.git/` still
+// resolve to `repo`. Without this, the basename would collapse to ""
+// and the clone target would be the caller's CWD — which then trips
+// the "target exists" replace flow and clobbers unrelated work.
 func repoNameFromURL(url string) string {
-	name := strings.TrimSuffix(url, ".git")
+	name := strings.TrimRight(url, "/\\")
+	name = strings.TrimSuffix(name, ".git")
+	name = strings.TrimRight(name, "/\\")
 	if idx := strings.LastIndex(name, "/"); idx >= 0 {
 		name = name[idx+1:]
 	}
