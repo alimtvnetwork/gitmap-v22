@@ -97,6 +97,13 @@ func tryClaim(path string) error {
 
 // recoverOrFail inspects an existing lock; replaces it if the holder
 // died, returns ErrAlreadyHeld if the holder is alive.
+//
+// Special case: when the recorded PID is OUR pid, the lock is already
+// held by this process — signal(0) trivially succeeds for the caller's
+// own PID on every OS, so without this guard a second in-process
+// Acquire would falsely "reclaim" its own lock and silently double-
+// claim, defeating the whole point of the advisory lock. Tested by
+// TestAcquire_DoubleClaimFails.
 func recoverOrFail(path string) error {
 	pid, err := readPID(path)
 	if err != nil {
@@ -104,6 +111,9 @@ func recoverOrFail(path string) error {
 		os.Remove(path)
 
 		return writePIDFile(path)
+	}
+	if pid == os.Getpid() {
+		return fmt.Errorf("%w (pid=%d, file=%s)", ErrAlreadyHeld, pid, path)
 	}
 	if processRunning(pid) {
 		return fmt.Errorf("%w (pid=%d, file=%s)", ErrAlreadyHeld, pid, path)
