@@ -49,31 +49,31 @@ irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v18/main/gitmap/scrip
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v18/main/gitmap/scripts/install.sh | sh
 ```
 
-### 📌 Pinned version (`v4.32.0`)
+### 📌 Pinned version (`v4.33.0`)
 
 ```powershell
 # Windows · PowerShell
-irm https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/release-version-v4.32.0.ps1 | iex
+irm https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/release-version-v4.33.0.ps1 | iex
 ```
 
 ```bash
 # macOS · Linux · Bash
-curl -fsSL https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/release-version-v4.32.0.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/release-version-v4.33.0.sh | bash
 ```
 
-#### 🧭 Version matrix — `v4.32.0` install-script URLs
+#### 🧭 Version matrix — `v4.33.0` install-script URLs
 
-One-line installers and release assets for the pinned **v4.32.0** build across every supported platform. All URLs resolve to the exact release tag — no fallback, no discovery.
+One-line installers and release assets for the pinned **v4.33.0** build across every supported platform. All URLs resolve to the exact release tag — no fallback, no discovery.
 
 | Platform | Shell | Install-script URL | Release binary asset |
 | --- | --- | --- | --- |
-| **Windows** (amd64) | PowerShell | [`release-version-v4.32.0.ps1`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/release-version-v4.32.0.ps1) | [`gitmap-v18.32.0-windows-amd64.zip`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/gitmap-v18.32.0-windows-amd64.zip) |
-| **macOS** (arm64) | Bash | [`release-version-v4.32.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/release-version-v4.32.0.sh) | [`gitmap-v18.32.0-darwin-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/gitmap-v18.32.0-darwin-arm64.tar.gz) |
-| **macOS** (amd64) | Bash | [`release-version-v4.32.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/release-version-v4.32.0.sh) | [`gitmap-v18.32.0-darwin-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/gitmap-v18.32.0-darwin-amd64.tar.gz) |
-| **Linux** (amd64) | Bash | [`release-version-v4.32.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/release-version-v4.32.0.sh) | [`gitmap-v18.32.0-linux-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/gitmap-v18.32.0-linux-amd64.tar.gz) |
-| **Linux** (arm64) | Bash | [`release-version-v4.32.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/release-version-v4.32.0.sh) | [`gitmap-v18.32.0-linux-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.32.0/gitmap-v18.32.0-linux-arm64.tar.gz) |
+| **Windows** (amd64) | PowerShell | [`release-version-v4.33.0.ps1`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/release-version-v4.33.0.ps1) | [`gitmap-v18.33.0-windows-amd64.zip`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/gitmap-v18.33.0-windows-amd64.zip) |
+| **macOS** (arm64) | Bash | [`release-version-v4.33.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/release-version-v4.33.0.sh) | [`gitmap-v18.33.0-darwin-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/gitmap-v18.33.0-darwin-arm64.tar.gz) |
+| **macOS** (amd64) | Bash | [`release-version-v4.33.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/release-version-v4.33.0.sh) | [`gitmap-v18.33.0-darwin-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/gitmap-v18.33.0-darwin-amd64.tar.gz) |
+| **Linux** (amd64) | Bash | [`release-version-v4.33.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/release-version-v4.33.0.sh) | [`gitmap-v18.33.0-linux-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/gitmap-v18.33.0-linux-amd64.tar.gz) |
+| **Linux** (arm64) | Bash | [`release-version-v4.33.0.sh`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/release-version-v4.33.0.sh) | [`gitmap-v18.33.0-linux-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v18/releases/download/v4.33.0/gitmap-v18.33.0-linux-arm64.tar.gz) |
 
-> **Release page:** [github.com/alimtvnetwork/gitmap-v18/releases/tag/v4.32.0](https://github.com/alimtvnetwork/gitmap-v18/releases/tag/v4.32.0) · **Asset naming contract:** `gitmap-<version>-<os>-<arch>.<ext>` (`.zip` on Windows, `.tar.gz` elsewhere) — verified by the installer pre-flight HEAD probe.
+> **Release page:** [github.com/alimtvnetwork/gitmap-v18/releases/tag/v4.33.0](https://github.com/alimtvnetwork/gitmap-v18/releases/tag/v4.33.0) · **Asset naming contract:** `gitmap-<version>-<os>-<arch>.<ext>` (`.zip` on Windows, `.tar.gz` elsewhere) — verified by the installer pre-flight HEAD probe.
 
 ### 🎯 Install — Quick (pick your install drive)
 
