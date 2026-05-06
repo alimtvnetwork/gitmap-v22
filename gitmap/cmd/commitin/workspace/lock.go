@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -69,11 +70,19 @@ func writeLockPid(lockPath string) error {
 
 // isProcessAlive uses signal-0 probing — works on POSIX and Windows
 // (Windows os.FindProcess always succeeds; signal(0) returns nil for
-// running processes and an error otherwise).
+// running processes and an error otherwise). EPERM is treated as
+// "alive": the process exists, we just lack permission to signal it
+// (e.g. PID 1 / root-owned processes when running as a normal user
+// in CI). Without this, `kill(0, pid)` on PID 1 from a non-root
+// runner falsely reports the process as dead.
 func isProcessAlive(pid int) bool {
 	proc, err := os.FindProcess(pid)
 	if err != nil {
 		return false
 	}
-	return proc.Signal(syscall.Signal(0)) == nil
+	sigErr := proc.Signal(syscall.Signal(0))
+	if sigErr == nil {
+		return true
+	}
+	return errors.Is(sigErr, syscall.EPERM)
 }
