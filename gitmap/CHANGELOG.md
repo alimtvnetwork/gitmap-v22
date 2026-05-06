@@ -1,6 +1,39 @@
 # Changelog
 
+## v4.19.0 — `gitmap clone-pick --replay <id|name>` shipped
+
+### Added
+- `gitmap clone-pick --replay <id|name>` re-runs a previously saved
+  selection without retyping the URL or the path list. Numeric refs
+  resolve through the `SelectionId` index; everything else is treated
+  as a `Name` lookup (most-recently-saved wins). When the replay
+  succeeds, `CreatedAt` on the row is bumped so the most-recently-used
+  selection sorts to the top of future listings.
+- `--replay` co-exists with the regular runtime flags: `--dry-run`,
+  `--quiet`, `--force`, and `--dest` from the current invocation
+  override the persisted Plan, but the URL / paths / mode / branch /
+  depth / cone / keep-git settings are reproduced verbatim from the
+  saved row. The "no saved selection matches %q" message uses the
+  spec'd format so CI greps stay stable.
+- New `clonepick.Loader` interface (read surface) split from the
+  existing `Persister` (write surface). `*store.DB` implements both,
+  but tests can fake just the lookup half. `clonepick.LoadFromDB` and
+  `clonepick.TouchAfterReplay` are the only two new exported entry
+  points; everything else stays package-private.
+- Unit coverage in `clonepick/replay_test.go` exercises numeric vs.
+  name routing, the missing-ref error path, blank/nil-loader guards,
+  and the dry-run skip on `TouchAfterReplay`.
+
+### Changed
+- `cmd/clonepick.go` no longer requires the positional `<repo-url>`
+  when `--replay` is set. Missing both still exits with code 2 and
+  the existing `MsgClonePickMissingURL` message — no behavioral change
+  for fresh runs.
+- `Version` constant bumped to `4.19.0`.
+
 ## v4.18.0 — `gitmap commit-in` / `cin` — chronological multi-source commit replay
+
+### Added
 
 ### Added
 
