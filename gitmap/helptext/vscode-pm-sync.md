@@ -63,9 +63,31 @@ To opt the entire entry set out of the brand tag:
 
 ## Flags
 
-| Flag        | Purpose                                          |
-|-------------|--------------------------------------------------|
-| `--dry-run` | Preview entry counts without writing any change. |
+| Flag                | Purpose                                                                                       |
+|---------------------|-----------------------------------------------------------------------------------------------|
+| `--dry-run`         | Preview entry counts without writing any change.                                              |
+| `--projects-json`   | Absolute path to a `projects.json` (overrides VS Code user-data discovery).                   |
+| `--tag <name>`      | Replace detected tags with this name (repeatable; accepts comma-list).                        |
+| `--mode <strategy>` | Tag merge strategy: `union` (default) | `replace` | `intersection`. See **Modes** below.    |
+
+## Modes
+
+| Mode           | Final tag set                                  | Use when                                                                       |
+|----------------|------------------------------------------------|--------------------------------------------------------------------------------|
+| `union`        | existing ∪ detected (dedup'd, default)         | You want gitmap to ADD tags but never remove user-added ones. The default.     |
+| `replace`      | detected verbatim (brand survives via detector)| You want every entry's tag set to match exactly what the detector produces.    |
+| `intersection` | (existing ∩ detected) ∪ {`gitmap`}             | You want to PRUNE stale tags but never lose the `gitmap` brand pin.            |
+
+The `gitmap` brand tag is preserved under every mode:
+- `union` — added by the detector, kept by the union.
+- `replace` — added by the detector (which always pre-pends it).
+- `intersection` — pinned explicitly even when the strict intersection is empty.
+
+```
+gitmap vpm                       # default — additive union
+gitmap vpm --mode replace        # detector wins outright
+gitmap vpm --mode intersection   # prune stale tags, keep brand
+```
 
 ## Exit codes
 
