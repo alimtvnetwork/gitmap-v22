@@ -7,6 +7,7 @@ import {
   commitInAutoInit as autoInit,
   commitInProfileJson as profileJson,
 } from "./commitInData";
+import CommitInExamples from "./CommitInExamples";
 
 const CommitInPage = () => (
   <DocsLayout>
