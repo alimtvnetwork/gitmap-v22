@@ -12,7 +12,7 @@ func TestByPrefixGroupsConventionalCommits(t *testing.T) {
 		{Hash: "b2", Subject: "fix: handle empty config"},
 		{Hash: "c3", Subject: "docs: clarify install flow"},
 		{Hash: "d4", Subject: "feat: second feature"},
-		{Hash: "e5", Subject: "Changes"},                  // skipped
+		{Hash: "e5", Subject: "Changes"},                    // skipped
 		{Hash: "f6", Subject: "refactor!: drop legacy api"}, // breaking marker
 	}
 

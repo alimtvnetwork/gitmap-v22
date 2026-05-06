@@ -35,9 +35,9 @@ var ErrPickerCancelled = errors.New("clone-pick: picker cancelled")
 // each method stays under the 15-line cap; rendering is delegated to
 // picker_view.go.
 type pickerModel struct {
-	paths     []string
-	picked    map[int]bool
-	cursor    int
+	paths  []string
+	picked map[int]bool
+	cursor int
 	// viewportHeight is the number of rows the row window can show
 	// at once (terminal height minus header + footer chrome). Set
 	// from tea.WindowSizeMsg; defaults to defaultViewportHeight

@@ -35,24 +35,24 @@ const (
 
 // UI messages.
 const (
-	MsgChecking      = "\n  ■ Checking for updates...\n"
-	MsgCurrentVer    = "  Current version: %s\n"
-	MsgLatestVer     = "  Latest version:  %s\n"
-	MsgUpToDate      = "  ✓ Already up to date (%s)\n\n"
-	MsgUpdateAvail   = "  %s → %s\n"
-	MsgDownloading   = "  ■ Downloading installer for %s...\n"
+	MsgChecking       = "\n  ■ Checking for updates...\n"
+	MsgCurrentVer     = "  Current version: %s\n"
+	MsgLatestVer      = "  Latest version:  %s\n"
+	MsgUpToDate       = "  ✓ Already up to date (%s)\n\n"
+	MsgUpdateAvail    = "  %s → %s\n"
+	MsgDownloading    = "  ■ Downloading installer for %s...\n"
 	MsgRunningInstall = "  ■ Running installer...\n"
-	MsgDone          = "\n  ✓ Update complete.\n"
-	MsgVerifyFail    = "  ✗ Version verification failed: expected %s, got %s\n"
-	MsgHandoff       = "  → Handing off to worker...\n"
+	MsgDone           = "\n  ✓ Update complete.\n"
+	MsgVerifyFail     = "  ✗ Version verification failed: expected %s, got %s\n"
+	MsgHandoff        = "  → Handing off to worker...\n"
 )
 
 // Error messages.
 const (
-	ErrFetchRelease  = "  ✗ Failed to check latest release: %v\n"
-	ErrGetVersion    = "  ✗ Failed to get installed version: %v\n"
-	ErrDownload      = "  ✗ Failed to download installer: %v\n"
-	ErrRunInstaller  = "  ✗ Installer failed: %v\n"
-	ErrCreateCopy    = "  ✗ Failed to create handoff copy: %v\n"
-	ErrLaunchWorker  = "  ✗ Failed to launch worker: %v\n"
+	ErrFetchRelease = "  ✗ Failed to check latest release: %v\n"
+	ErrGetVersion   = "  ✗ Failed to get installed version: %v\n"
+	ErrDownload     = "  ✗ Failed to download installer: %v\n"
+	ErrRunInstaller = "  ✗ Installer failed: %v\n"
+	ErrCreateCopy   = "  ✗ Failed to create handoff copy: %v\n"
+	ErrLaunchWorker = "  ✗ Failed to launch worker: %v\n"
 )
