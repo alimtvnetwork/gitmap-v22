@@ -16,6 +16,7 @@ user explicitly says `next` (per `.lovable/plan.md`).
 | 06 | `06-message-and-function-intel.md`  | Message rules order, weak-word policy, per-language function detect |
 | 07 | `07-acceptance-and-edge-cases.md`   | Acceptance matrix, ambiguity resolutions, conformance tests         |
 | 08 | `08-tag-mirroring-and-release-branches.md` | Annotated-tag mirroring, version-tag detection, auto release branches, RewrittenCommit columns, T1–T10 |
+| 09 | `09-commit-in-replay-map.md`        | `CommitInReplayMap` table — annotated-tag old↔new SHA map, `TagReplayOutcome` enum, cross-run idempotency lookup, R1–R10 |
 
 ## Source-of-truth rules (apply to ALL files in this folder)
 
