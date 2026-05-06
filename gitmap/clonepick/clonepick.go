@@ -72,6 +72,14 @@ type Plan struct {
 	DryRun bool
 	Quiet  bool
 	Force  bool
+	// PreClonedSrc, when non-empty, is a temp directory holding a
+	// metadata-only clone (filter=blob:none, no-checkout) that the
+	// executor will promote into DestDir instead of running a fresh
+	// `git clone`. Set by the --ask picker so we don't pay the
+	// clone cost twice. Always absolute. The executor takes
+	// ownership: on success the dir is moved away, on failure the
+	// caller is responsible for cleanup.
+	PreClonedSrc string
 }
 
 // Result describes what Execute did with one Plan. Returned by
