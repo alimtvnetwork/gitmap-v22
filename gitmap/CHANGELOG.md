@@ -1,5 +1,24 @@
 # Changelog
 
+## v4.28.0 — golden CSVs: regenerate after gofmt-sweep CRLF→LF drift
+
+### Fixed
+- `gitmap/clonefrom/testdata/clonefrom_report_{empty,canonical,quoting}.csv`
+  and `gitmap/formatter/testdata/scan_{empty,canonical}.csv` were rewritten
+  with LF line endings (and trailing newline) by the v4.26.0 repo-wide
+  formatting sweep, but the corresponding writers (`writeReportRows`,
+  formatter `csv.go`) emit CRLF per `csvcrlf_contract_test.go`. Result:
+  `TestCloneFromReport_Golden_*` and `TestScanGolden_CSV*` failed with
+  byte-exact mismatches in CI. Regenerated all five CSV goldens (and the
+  two scan JSON goldens for parity) via the documented two-step
+  `GITMAP_UPDATE_GOLDEN=1 GITMAP_ALLOW_GOLDEN_UPDATE=1` flow so on-disk
+  bytes match writer output exactly.
+
+### Notes
+- No production code changed — fixture-only update.
+- Future protection: `.gitattributes` should pin `*.csv` under `testdata/`
+  to `eol=crlf` to prevent editor/auto-format drift from recurring.
+
 ## v4.27.0 — clone-pick: replace bare-err with cliexit.Reportf
 
 ### Fixed
