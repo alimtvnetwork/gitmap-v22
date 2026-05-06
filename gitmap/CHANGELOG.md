@@ -1,5 +1,35 @@
 # Changelog
 
+## v4.21.0 — clone-pick `--ask` clones once, not twice
+
+### Changed
+- `gitmap clone-pick --ask` now reuses the picker's metadata-only
+  clone as the final sparse-checkout destination instead of re-cloning
+  after the user confirms their selection. Halves the network cost of
+  the interactive flow on large repos.
+- The reuse path tries `os.Rename` first (fast, same-filesystem); on
+  failure (cross-fs / Windows quirks) it falls back to a stdlib
+  copy-tree + remove-src walker. Symlinks are preserved; non-regular
+  entries (devices/sockets) are skipped — git never produces them.
+- Dry-run + cancel paths still clean up the temp clone immediately so
+  no orphan dirs accumulate under `$TMPDIR`.
+
+### Added
+- `clonepick.RunPickerKeep` / `clonepick.ListRepoPathsKeep`: keep-clone
+  variants that return the temp dir so the cmd layer can hand it to
+  the executor. The original `RunPicker` / `listRepoPaths` are now
+  thin wrappers that always remove the temp dir for non-reuse callers.
+- `Plan.PreClonedSrc` (runtime-only field): when set, the executor
+  promotes that dir into `DestDir` and skips `git clone`.
+- `constants.ErrClonePickPromoteSrc`: error string emitted when both
+  rename and copy-tree fallbacks fail during promote.
+
+### Tests
+- `gitmap/clonepick/promote_test.go`: covers the rename fast path and
+  the copy-tree fallback against `t.TempDir()` so the optimisation has
+  regression coverage even when CI can't trigger a real EXDEV.
+
+
 ## v4.20.0 — `gitmap clone-pick --ask` interactive picker shipped
 
 ### Added
