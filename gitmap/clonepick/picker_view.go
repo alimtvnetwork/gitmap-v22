@@ -10,34 +10,49 @@ import (
 )
 
 // View renders the picker as a single string per tea-model contract.
-// Layout:
-//
-//	gitmap clone-pick --ask  (12/487 selected)
-//	[x] docs/                       <- cursor row, bracketed
-//	[ ] src/cmd/
-//	[-] node_modules/    (auto-greyed)
-//	...
-//	space toggle | a all | n none | s save | q quit
+// Only the visible window (viewportHeight rows starting at
+// scrollOffset) is rendered so large repos don't blow past the
+// terminal. Header shows "selected/total" plus an indicator of
+// where in the list the window sits.
 func (m pickerModel) View() string {
 	if len(m.paths) == 0 {
 		return "clone-pick: repository has no tracked files\n"
 	}
 	var b strings.Builder
-	fmt.Fprintf(&b, "gitmap clone-pick --ask  (%d/%d selected)\n",
-		m.countPicked(), len(m.paths))
+	fmt.Fprintf(&b, "gitmap clone-pick --ask  (%d/%d selected, rows %d-%d)\n",
+		m.countPicked(), len(m.paths),
+		m.firstVisible()+1, m.lastVisible()+1)
 	m.renderRows(&b)
-	b.WriteString("\nspace toggle | a all | n none | s save | q quit\n")
+	b.WriteString("\nspace toggle | a all | n none | pgup/pgdn page | g/G home/end | s save | q quit\n")
 
 	return b.String()
 }
 
-// renderRows writes one line per visible path. Visible window is the
-// full slice in v1 (most repos fit in a normal terminal); a windowed
-// scroller is a follow-up if real-world repos blow past the screen.
+// firstVisible / lastVisible report the inclusive 0-based bounds of
+// the row window currently rendered. Used in the header so the user
+// can see "rows 41-60 of 487" without counting.
+func (m pickerModel) firstVisible() int { return m.scrollOffset }
+
+func (m pickerModel) lastVisible() int {
+	last := m.scrollOffset + m.viewportHeight - 1
+	if last >= len(m.paths) {
+		last = len(m.paths) - 1
+	}
+
+	return last
+}
+
+// renderRows writes one line per visible path. The window is
+// [scrollOffset, scrollOffset+viewportHeight) clamped to len(paths)
+// so we never read past the slice.
 func (m pickerModel) renderRows(b *strings.Builder) {
-	for i, path := range m.paths {
+	end := m.scrollOffset + m.viewportHeight
+	if end > len(m.paths) {
+		end = len(m.paths)
+	}
+	for i := m.scrollOffset; i < end; i++ {
 		b.WriteString(formatRow(i == m.cursor, m.picked[i],
-			IsAutoExcluded(path), path))
+			IsAutoExcluded(m.paths[i]), m.paths[i]))
 		b.WriteByte('\n')
 	}
 }
