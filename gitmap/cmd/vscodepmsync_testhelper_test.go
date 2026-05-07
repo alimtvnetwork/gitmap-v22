@@ -175,9 +175,3 @@ func swapHomeEnv(tmp string) func() {
 		os.Setenv(constants.VSCodeEnvAppData, prevAppData)
 	}
 }
-
-	return func() {
-		os.Setenv("HOME", prevHome)
-		os.Setenv("XDG_CONFIG_HOME", prevXDG)
-	}
-}
