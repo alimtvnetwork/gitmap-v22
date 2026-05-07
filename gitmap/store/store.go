@@ -416,9 +416,23 @@ func ensureDir(dir string) error {
 	return os.MkdirAll(dir, constants.DirPermission)
 }
 
-// enableFK turns on SQLite foreign key enforcement.
+// enableFK turns on SQLite foreign key enforcement and applies the
+// WAL + relaxed-sync pragmas. WAL + synchronous=NORMAL eliminates the
+// per-commit FlushFileBuffers stall that caused 10-min Windows CI
+// timeouts in store/ and cmd/ test packages (see panic stacks in
+// _winSync → FlushFileBuffers). busy_timeout gives concurrent test
+// connections a 5s grace window instead of immediate SQLITE_BUSY.
 func enableFK(conn *sql.DB) error {
-	_, err := conn.Exec(constants.SQLEnableFK)
+	for _, pragma := range []string{
+		constants.SQLPragmaJournalWAL,
+		constants.SQLPragmaSynchronousNor,
+		constants.SQLPragmaBusyTimeout5s,
+		constants.SQLEnableFK,
+	} {
+		if _, err := conn.Exec(pragma); err != nil {
+			return fmt.Errorf("apply pragma %q: %w", pragma, err)
+		}
+	}
 
-	return err
+	return nil
 }

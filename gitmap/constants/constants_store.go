@@ -91,6 +91,19 @@ const SQLAddSourceColumn = "ALTER TABLE Release ADD COLUMN Source TEXT DEFAULT '
 // SQL: enable foreign keys.
 const SQLEnableFK = "PRAGMA foreign_keys = ON"
 
+// SQL: WAL journal + relaxed sync for fast migrations on Windows.
+// Default `synchronous=FULL` calls FlushFileBuffers on every commit,
+// which serializes parallel tests behind kernel fsync and triggers
+// 10-min CI timeouts. WAL + NORMAL is the SQLite-recommended default
+// for application-level durability and is safe across crashes (only
+// risk is losing the last in-flight commit on power loss — fine for
+// gitmap's local cache role).
+const (
+	SQLPragmaJournalWAL     = "PRAGMA journal_mode = WAL"
+	SQLPragmaSynchronousNor = "PRAGMA synchronous = NORMAL"
+	SQLPragmaBusyTimeout5s  = "PRAGMA busy_timeout = 5000"
+)
+
 // SQL: repo operations (v15: Repo table, RepoId PK).
 const (
 	SQLUpsertRepo = `INSERT INTO Repo (Slug, RepoName, HttpsUrl, SshUrl, Branch, RelativePath, AbsolutePath, CloneInstruction, Notes)
