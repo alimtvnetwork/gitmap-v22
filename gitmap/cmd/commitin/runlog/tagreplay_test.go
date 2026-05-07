@@ -123,7 +123,7 @@ func TestLookupTagReplayHitsOnPriorCreated(t *testing.T) {
 	_, _ = RecordTagReplay(db, runID, rewID, TagReplayFacts{
 		SourceTagName: "v2.0.0", SourceTagSha: "tag-sha-3",
 		SourceCommitSha: "src3", DestTagSha: "dest-3", DestCommitSha: "new3",
-		IsVersionTag: true, Outcome: constants.TagReplayOutcomeCreated,
+		IsAnnotated: true, IsVersionTag: true, Outcome: constants.TagReplayOutcomeCreated,
 	})
 	got, err := LookupTagReplay(db, "v2.0.0", "tag-sha-3")
 	if err != nil {
