@@ -63,7 +63,7 @@ import gm "github.com/example/acme-v9/pkg"
 // and feeds the new slug back through remoteSlugRe.
 func TestFixRepoRewriteV9ToV12Fixture(t *testing.T) {
 	const (
-		base    = "gitmap"
+		base    = "acme"
 		target  = 9
 		current = 12
 	)
