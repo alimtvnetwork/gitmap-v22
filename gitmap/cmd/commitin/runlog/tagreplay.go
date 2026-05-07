@@ -168,9 +168,3 @@ func nullIfEmpty(s string) any {
 	return s
 }
 
-func boolToInt(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
-}
