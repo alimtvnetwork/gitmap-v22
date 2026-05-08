@@ -138,10 +138,14 @@ func commandTemplate(e ctxEntry, exe string) string {
 		return `pwsh -NoExit -NoProfile -Command "Set-Location '%V'; Write-Host -NoNewline 'gitmap '"`
 	}
 
+	target := exe
+	if e.Exe != "" {
+		target = e.Exe // resolved from PATH at runtime (e.g. "git")
+	}
 	args := strings.Join(e.Args, " ")
 	if e.Mode == constants.CtxModeSilent {
-		return fmt.Sprintf(`pwsh -NoProfile -WindowStyle Hidden -Command "Set-Location '%%V'; & '%s' %s 2>&1 | Out-String | %% { msg.exe * $_ }"`, exe, args)
+		return fmt.Sprintf(`pwsh -NoProfile -WindowStyle Hidden -Command "Set-Location '%%V'; & '%s' %s 2>&1 | Out-String | %% { msg.exe * $_ }"`, target, args)
 	}
 
-	return fmt.Sprintf(`pwsh -NoExit -NoProfile -Command "Set-Location '%%V'; & '%s' %s"`, exe, args)
+	return fmt.Sprintf(`pwsh -NoExit -NoProfile -Command "Set-Location '%%V'; & '%s' %s"`, target, args)
 }

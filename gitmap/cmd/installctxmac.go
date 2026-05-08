@@ -112,13 +112,17 @@ func writeFileCtx(path, body string) bool {
 // folder path, passed as argument because inputMethod=1).
 func macShellFor(e flatCtxEntry, exe string) string {
 	args := strings.Join(e.Args, " ")
+	target := exe
+	if e.Exe != "" {
+		target = e.Exe
+	}
 	switch e.Mode {
 	case constants.CtxModePrefill:
 		return `osascript -e 'tell application "Terminal" to do script "cd \"'"$1"'\" && printf \"gitmap \""' -e 'tell application "Terminal" to activate'`
 	case constants.CtxModeSilent:
-		return fmt.Sprintf(`cd "$1" && OUT=$('%s' %s 2>&1); osascript -e "display notification \"$(echo \"$OUT\" | head -c 200)\" with title \"%s\""`, exe, args, e.Label)
+		return fmt.Sprintf(`cd "$1" && OUT=$('%s' %s 2>&1); osascript -e "display notification \"$(echo \"$OUT\" | head -c 200)\" with title \"%s\""`, target, args, e.Label)
 	default:
-		return fmt.Sprintf(`osascript -e 'tell application "Terminal" to do script "cd \"'"$1"'\" && '"'"'%s'"'"' %s"' -e 'tell application "Terminal" to activate'`, exe, args)
+		return fmt.Sprintf(`osascript -e 'tell application "Terminal" to do script "cd \"'"$1"'\" && '"'"'%s'"'"' %s"' -e 'tell application "Terminal" to activate'`, target, args)
 	}
 }
 

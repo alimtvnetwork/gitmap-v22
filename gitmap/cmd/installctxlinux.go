@@ -106,14 +106,18 @@ func installDolphin(flat []flatCtxEntry, exe string) bool {
 // is unset under Dolphin/Thunar — we fall back to the first arg.
 func linuxShellScript(e flatCtxEntry, exe string) string {
 	args := strings.Join(e.Args, " ")
+	target := exe
+	if e.Exe != "" {
+		target = e.Exe
+	}
 	cd := `D="${1:-$PWD}"; cd "$D" || exit 1`
 	switch e.Mode {
 	case constants.CtxModePrefill:
 		return "#!/bin/sh\n" + cd + "\nx-terminal-emulator -e sh -c 'printf \"gitmap \"; exec $SHELL' &\n"
 	case constants.CtxModeSilent:
-		return fmt.Sprintf("#!/bin/sh\n%s\nOUT=$('%s' %s 2>&1)\nnotify-send 'gitmap' \"$(echo \"$OUT\" | head -c 200)\" || echo \"$OUT\"\n", cd, exe, args)
+		return fmt.Sprintf("#!/bin/sh\n%s\nOUT=$('%s' %s 2>&1)\nnotify-send 'gitmap' \"$(echo \"$OUT\" | head -c 200)\" || echo \"$OUT\"\n", cd, target, args)
 	default:
-		return fmt.Sprintf("#!/bin/sh\n%s\nx-terminal-emulator -e sh -c \"'%s' %s; exec $SHELL\" &\n", cd, exe, args)
+		return fmt.Sprintf("#!/bin/sh\n%s\nx-terminal-emulator -e sh -c \"'%s' %s; exec $SHELL\" &\n", cd, target, args)
 	}
 }
 
@@ -136,13 +140,17 @@ func dolphinDesktop(flat []flatCtxEntry, exe string) string {
 // clicked folder per the .desktop spec.
 func dolphinExec(e flatCtxEntry, exe string) string {
 	args := strings.Join(e.Args, " ")
+	target := exe
+	if e.Exe != "" {
+		target = e.Exe
+	}
 	switch e.Mode {
 	case constants.CtxModePrefill:
 		return `cd "%f" && x-terminal-emulator -e sh -c 'printf "gitmap "; exec $SHELL'`
 	case constants.CtxModeSilent:
-		return fmt.Sprintf(`cd "%%f" && OUT=$('%s' %s 2>&1) && notify-send 'gitmap' "$OUT"`, exe, args)
+		return fmt.Sprintf(`cd "%%f" && OUT=$('%s' %s 2>&1) && notify-send 'gitmap' "$OUT"`, target, args)
 	default:
-		return fmt.Sprintf(`cd "%%f" && x-terminal-emulator -e sh -c "'%s' %s; exec $SHELL"`, exe, args)
+		return fmt.Sprintf(`cd "%%f" && x-terminal-emulator -e sh -c "'%s' %s; exec $SHELL"`, target, args)
 	}
 }
 

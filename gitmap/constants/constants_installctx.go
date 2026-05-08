@@ -39,3 +39,24 @@ const (
 	MsgCtxOpenTerminalLbl = "Open terminal here"
 	MsgCtxDocsLbl         = "Docs"
 )
+
+// Raw git context-menu entries. These bypass gitmap and shell out to
+// `git` directly so users can inspect history/diff/log on the clicked
+// folder. Operate on cwd; for file-scoped views the user can pass the
+// path interactively from the opened terminal.
+const (
+	CtxExeGit          = "git"
+	CtxGitHistoryLabel = "History (git log graph)"
+	CtxGitDiffLabel    = "Diff (git diff)"
+	CtxGitLogLabel     = "Log (git log)"
+	CtxGitStatusLabel  = "Status (git status)"
+)
+
+// Raw git argument vectors. Kept here to avoid magic strings in
+// installctxentries.go (constants-only policy).
+var (
+	CtxGitHistoryArgs = []string{"log", "--oneline", "--graph", "--decorate", "--all", "-n", "100"}
+	CtxGitDiffArgs    = []string{"diff", "--stat", "HEAD"}
+	CtxGitLogArgs     = []string{"log", "-n", "30", "--pretty=format:%h %ad %s", "--date=short"}
+	CtxGitStatusArgs  = []string{"status"}
+)
