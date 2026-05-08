@@ -137,7 +137,7 @@ func specialInstallHandler(tool string) func(installOptions) {
 	case constants.ToolPwshCtx:
 		return func(installOptions) { runPwshContextMenu() }
 	case constants.ToolCtx:
-		return func(installOptions) { runInstallCtx() }
+		return func(opts installOptions) { runInstallCtx(opts.Explain) }
 	case constants.ToolAllDevTools:
 		return func(opts installOptions) { runAllDevTools(opts) }
 	}
