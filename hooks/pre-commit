@@ -60,7 +60,37 @@ if [ -x "$DEPLOY_GUARD" ]; then
   echo "  ✓ deploy-layout guard passed"
 fi
 
-# 4. golangci-lint — full suite
+# 4. gofmt — block unformatted Go files (mirrors CI gofmt -l . gate)
+#
+# Runs against staged .go files only (not the full tree) so contributors
+# get fast feedback on the exact files they're committing. Uses `gofmt -l`
+# which prints filenames of unformatted files and exits 0 either way —
+# we treat any output as failure. Auto-fix recipe is printed verbatim.
+#
+# Note: must run BEFORE golangci-lint because gofmt-dirty files produce
+# noisy, confusing lint output that masks the real (formatting) cause.
+GO_STAGED=$(echo "$STAGED" | grep -E '\.go$' || true)
+if [ -n "$GO_STAGED" ]; then
+  if ! command -v gofmt &>/dev/null; then
+    echo "⚠ gofmt not found — skipping format check (install Go toolchain)."
+  else
+    echo "Running gofmt on staged .go files..."
+    DIRTY=$(echo "$GO_STAGED" | xargs gofmt -l 2>/dev/null || true)
+    if [ -n "$DIRTY" ]; then
+      echo ""
+      echo "✗ The following staged Go files are not gofmt-clean:"
+      echo "$DIRTY" | sed 's/^/    /'
+      echo ""
+      echo "  Fix locally with:"
+      echo "    gofmt -w $(echo "$DIRTY" | tr '\n' ' ')"
+      echo "  Then re-stage (git add) and re-commit."
+      exit 1
+    fi
+    echo "  ✓ gofmt clean"
+  fi
+fi
+
+# 5. golangci-lint — full suite
 if ! command -v golangci-lint &>/dev/null; then
   echo "⚠ golangci-lint not found — skipping lint check."
   echo "  Install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8"
