@@ -1,9 +1,5 @@
 package cmd
 
-import (
-	"fmt"
-	"os"
-)
 
 // runPullAll is the explicit batch-pull entry point. It forwards to
 // runPull with the --all flag injected, so the heavy lifting

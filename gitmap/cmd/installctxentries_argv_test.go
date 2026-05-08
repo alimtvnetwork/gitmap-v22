@@ -65,7 +65,7 @@ var expectedCtxArgv = map[string]struct {
 // but not themselves recorded. Duplicate KeyNames at the same level (e.g. the
 // double-listed 90_terminal / 91_docs) are tolerated — the second occurrence
 // must match the first.
-func flattenCtxMenu(t *testing.T) map[string]ctxEntry {
+func flattenCtxMenuByPath(t *testing.T) map[string]ctxEntry {
 	t.Helper()
 	out := map[string]ctxEntry{}
 	var walk func(prefix string, entries []ctxEntry)
@@ -93,7 +93,7 @@ func flattenCtxMenu(t *testing.T) map[string]ctxEntry {
 }
 
 func TestCtxMenuKeyNameToArgvMapping(t *testing.T) {
-	got := flattenCtxMenu(t)
+	got := flattenCtxMenuByPath(t)
 
 	for path, want := range expectedCtxArgv {
 		entry, ok := got[path]
@@ -123,7 +123,7 @@ func TestCtxMenuKeyNameToArgvMapping(t *testing.T) {
 // rename of FlagBumpDash or BumpMinor that silently swapped to a different
 // string would still trip a focused failure with a clear blame target.
 func TestCtxReleaseNextUsesBumpConstants(t *testing.T) {
-	got := flattenCtxMenu(t)
+	got := flattenCtxMenuByPath(t)
 	entry, ok := got["30_release/20_release_next"]
 	if !ok {
 		t.Fatal("release-next entry missing")
