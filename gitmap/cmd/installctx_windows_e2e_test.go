@@ -106,7 +106,7 @@ func TestCtxWindowsExtendedFlagOnlyOnExtended(t *testing.T) {
 	wantExtSlugs := map[string]bool{}
 	for _, l := range collectCtxLeaves(t) {
 		if l.Extended {
-			wantExtSlugs[lastSegment(l.Path)] = true
+			wantExtSlugs[lastPathSegment(l.Path)] = true
 		}
 	}
 
