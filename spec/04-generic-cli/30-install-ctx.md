@@ -100,25 +100,59 @@ Mirror the same tree under `Directory\shell\gitmap` so right-clicking
 the folder **item** (not just background) also works. Generation is
 table-driven from a single `[]ctxEntry` slice — see §4.
 
-## 3. Execution Model (mixed)
+## 3. Menu → Command Mapping (authoritative)
 
-Each entry declares `Mode` ∈ {`Silent`, `Terminal`}.
+`%V` (Windows) / `$1` (mac/Linux) is the **clicked folder**, used as the
+working directory for every entry. No flag is added unless listed
+below — defaults apply.
 
-| Mode       | Used for                                                 | Command template                                                                                                                                                              |
-| ---------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Silent`   | Read-only / fast queries: `find-next`, `list-releases`, `list-versions`, `*-repos`, `docs`, `release-pending` | `pwsh -NoProfile -WindowStyle Hidden -Command "Set-Location '%V'; $o = gitmap <args> 2>&1 \| Out-String; New-BurntToastNotification -Text 'gitmap <label>', $o"` (BurntToast optional; falls back to `msg.exe %username% "<first 200 chars>"`) |
-| `Terminal` | Mutating / interactive / long: `scan`, `rescan`, `clone-next`, `pull`, `pull-all`, `release*`, `fix-repo`, `visibility *`, `update`, `diff`, `logs`, `history` | `pwsh -NoExit -NoProfile -Command "Set-Location '%V'; gitmap <args>"`                                                                                                         |
-| `Prefill`  | Special: **Open terminal here**                          | `pwsh -NoExit -NoProfile -Command "Set-Location '%V'; Write-Host -NoNewline 'gitmap '"` — leaves a `gitmap ` prompt for the user to complete                                  |
+| KeyName              | Visible label                  | Exact `gitmap` invocation              | Mode     | Notes                                                                              |
+| -------------------- | ------------------------------ | -------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
+| `10_scan/10_scan_here`     | Scan here                | `gitmap scan`                          | Terminal | Walks current folder with default `--max-depth` and worker count from `git-setup.json`. No flags. |
+| `10_scan/20_rescan`        | Rescan                   | `gitmap rescan`                        | Terminal | Re-runs the most recent scan against the same root.                               |
+| `10_scan/30_find_next`     | Find next                | `gitmap find-next`                     | Silent   | Probes for the next available `<base>-vN+1` sibling. No `--scan-folder` (uses cwd); no `--json` (output goes to notification verbatim). |
+| `20_clone/10_clone_next`   | Clone-next here          | `gitmap clone-next`                    | Terminal | Flattens to base-name folder by default (v2.75.0+). |
+| `20_clone/20_pull`         | Pull                     | `gitmap pull`                          | Terminal | Fast-forward pull on current repo only. (`pull-all` is intentionally NOT in the menu — it is a multi-repo batch op invoked by power users.) |
+| `30_release/10_release`    | Release current          | `gitmap release`                       | Terminal | Re-tags `HEAD` at current `constants.Version`. Interactive prompts for missing notes. |
+| `30_release/20_release_next` | Release next (bump minor) | `gitmap release --bump minor`        | Terminal | Uses `constants.FlagBumpDash` + `constants.BumpMinor` — no string literals in the entry. Patch / major variants intentionally omitted from the menu (rarely used; users type them). |
+| `30_release/30_release_pull` | Release pull           | `gitmap release-pull`                  | Terminal | `git pull --ff-only` then `release`. Hard-fails on divergent history. |
+| `30_release/40_release_pending` | Release pending     | `gitmap release-pending`               | Silent   | Prints commits since last release. |
+| `30_release/50_list_releases` | List releases         | `gitmap list-releases`                 | Silent   | Single-repo view. (`--all-repos` deliberately omitted — would surprise the user clicking inside one folder.) |
+| `30_release/60_list_versions` | List versions         | `gitmap list-versions`                 | Silent   | Single-repo `RepoVersionHistory` view. |
+| `40_repos/10_go`           | Go projects              | `gitmap go-repos`                      | Silent   | Filters DB by `go.mod` detection. No `--json` (notification gets human text). |
+| `40_repos/20_node`         | Node projects            | `gitmap node-repos`                    | Silent   | `package.json` detection. |
+| `40_repos/30_react`        | React projects           | `gitmap react-repos`                   | Silent   | React dependency in `package.json`. |
+| `40_repos/40_cpp`          | C++ projects             | `gitmap cpp-repos`                     | Silent   | CMakeLists / `.cpp` detection. |
+| `40_repos/50_csharp`       | C# projects              | `gitmap csharp-repos`                  | Silent   | `.csproj` / `.sln` detection. |
+| `50_visibility/10_public`  | Make public              | `gitmap make-public`                   | Terminal | Calls `gh repo edit --visibility public` (or `glab`). Interactive confirm. |
+| `50_visibility/20_private` | Make private             | `gitmap make-private`                  | Terminal | Calls `gh repo edit --visibility private`. Interactive confirm. |
+| `60_tools/10_fix_repo`     | Fix repo                 | `gitmap fix-repo`                      | Terminal | Rewrites stale `<base>-vN` tokens to current version. No `--strict` from the menu. |
+| `60_tools/20_diff`         | Diff                     | `gitmap diff`                          | Terminal | Wraps `git diff` with gitmap's pager. |
+| `60_tools/30_history`      | History                  | `gitmap history`                       | Terminal | Local `CliInvocation` history; pages with `--limit 50` default. |
+| `60_tools/40_update`       | Update                   | `gitmap update`                        | Terminal | Self-update — Terminal so the user sees the new-version banner. |
+| `90_terminal`              | Open terminal here       | (no command — prefill prompt)          | Prefill  | Opens shell at folder, writes `gitmap ` literal so the user can finish typing. |
+| `91_docs`                  | Docs                     | `gitmap docs`                          | Silent   | Prints help-dashboard URL. |
 
-### 3.1 Notification fallback chain
+### 3.1 Execution-mode templates
 
-1. If `BurntToast` PowerShell module is available → toast.
-2. Else if `wsl` not running and `msg.exe` exists → modal popup.
-3. Else write to `%TEMP%\gitmap-ctx-<unix>.log` and toast a single
-   "Output saved to %TEMP%\…" line via `[System.Windows.Forms]`.
+| Mode       | Windows                                                                                                                | macOS                                                                                                                              | Linux                                                                                                       |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `Terminal` | `pwsh -NoExit -NoProfile -Command "Set-Location '%V'; & '<exe>' <args>"`                                               | `osascript -e 'tell application "Terminal" to do script "cd \"$1\" && <exe> <args>"' -e '… activate'`                              | `D="${1:-$PWD}"; cd "$D" && x-terminal-emulator -e sh -c "'<exe>' <args>; exec $SHELL" &`                   |
+| `Silent`   | `pwsh -NoProfile -WindowStyle Hidden -Command "Set-Location '%V'; & '<exe>' <args> 2>&1 \| Out-String \| msg.exe * $_"` | `cd "$1" && OUT=$('<exe>' <args> 2>&1); osascript -e "display notification \"$(echo $OUT \| head -c 200)\" with title \"<label>\""` | `D="${1:-$PWD}"; cd "$D"; OUT=$('<exe>' <args> 2>&1); notify-send 'gitmap' "$(echo $OUT \| head -c 200)"`   |
+| `Prefill`  | `pwsh -NoExit -NoProfile -Command "Set-Location '%V'; Write-Host -NoNewline 'gitmap '"`                                | `osascript -e 'tell application "Terminal" to do script "cd \"$1\" && printf \"gitmap \""' -e '… activate'`                        | `x-terminal-emulator -e sh -c 'printf "gitmap "; exec $SHELL'`                                              |
 
-Detection happens **at install time once**, and the chosen template is
-baked into the `(Default)` of each `\command` key. No runtime probing.
+### 3.2 Constant references (no magic strings)
+
+Every value above resolves through a constant in
+`gitmap/constants/`:
+
+| Used in entry                          | Constant                                                       |
+| -------------------------------------- | -------------------------------------------------------------- |
+| `release --bump minor`                 | `constants.CmdRelease` + `constants.FlagBumpDash` + `constants.BumpMinor` |
+| `--scan-folder` (find-next, not used)  | `constants.FindNextFlagScanFolder`                             |
+| `--json` (find-next, intentionally NOT used by menu) | `constants.FindNextFlagJSON`                       |
+| `--all-repos` (list-releases, not used by menu) | `constants.FlagAllRepos`                              |
+| Every `Cmd*`                            | `gitmap/constants/constants_cli.go` + per-domain `constants_*.go` |
 
 ## 4. Implementation Layout
 

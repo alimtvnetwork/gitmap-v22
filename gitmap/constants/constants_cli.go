@@ -470,3 +470,13 @@ const (
 	FlagDebugPaths     = "debug-paths"
 	FlagDescDebugPaths = "trace VS Code Project Manager sync rootPath canonicalization (raw → cleaned → resolved) to stderr; useful for diagnosing Windows 8.3 short-name and symlink dedup"
 )
+
+// Release flag names — surfaced as Cmd*-style constants so callers
+// (e.g. the right-click context menu in installctxentries.go and the
+// release parser in release.go) reference the same single source of
+// truth rather than literal "--bump" / "bump" strings.
+const (
+	FlagBump      = "bump"
+	FlagBumpDash  = "--bump"
+	FlagDryRunDsh = "--dry-run"
+)

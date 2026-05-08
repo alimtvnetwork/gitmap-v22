@@ -139,7 +139,7 @@ func parseReleaseFlags(args []string) (version, assets, commit, branch, bump, no
 	assetsFlag := fs.String("assets", "", constants.FlagDescAssets)
 	commitFlag := fs.String("commit", "", constants.FlagDescCommit)
 	branchFlag := fs.String("branch", "", constants.FlagDescRelBranch)
-	bumpFlag := fs.String("bump", "", constants.FlagDescBump)
+	bumpFlag := fs.String(constants.FlagBump, "", constants.FlagDescBump)
 	notesFlag := fs.String("notes", "", constants.FlagDescNotes)
 	targetsFlag := fs.String("targets", "", constants.FlagDescTargets)
 	draftFlag := fs.Bool("draft", false, constants.FlagDescDraft)
