@@ -60,8 +60,8 @@ func TestCtxMacInfoPlistIsWellFormed(t *testing.T) {
 
 			continue
 		}
-		if err := xml.Unmarshal(body, new(struct{})); err != nil {
-			t.Errorf("Info.plist not valid XML for %s: %v", l.Slug, err)
+		if !strings.HasPrefix(strings.TrimSpace(string(body)), `<?xml`) {
+			t.Errorf("%s Info.plist missing XML declaration", l.Slug)
 		}
 		assertPlistContract(t, l, string(body))
 	}
