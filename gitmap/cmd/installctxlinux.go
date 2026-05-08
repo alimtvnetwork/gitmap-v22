@@ -112,13 +112,15 @@ func linuxShellScript(e flatCtxEntry, exe string) string {
 	}
 	cd := `D="${1:-$PWD}"; cd "$D" || exit 1`
 	guard := extendedGuard(e)
+	echoSh := ctxExplainPrefixSh(target, e.Args)
+	announce := ctxExplainAnnounce(target, e.Args)
 	switch e.Mode {
 	case constants.CtxModePrefill:
 		return "#!/bin/sh\n" + cd + "\nx-terminal-emulator -e sh -c 'printf \"gitmap \"; exec $SHELL' &\n"
 	case constants.CtxModeSilent:
-		return fmt.Sprintf("#!/bin/sh\n%s\n%sOUT=$('%s' %s 2>&1)\nnotify-send 'gitmap' \"$(echo \"$OUT\" | head -c 200)\" || echo \"$OUT\"\n", cd, guard, target, args)
+		return fmt.Sprintf("#!/bin/sh\n%s\n%sOUT=$(printf %%s '%s'; '%s' %s 2>&1)\nnotify-send 'gitmap' \"$(echo \"$OUT\" | head -c 200)\" || echo \"$OUT\"\n", cd, guard, announce, target, args)
 	default:
-		return fmt.Sprintf("#!/bin/sh\n%s\n%sx-terminal-emulator -e sh -c \"'%s' %s; exec $SHELL\" &\n", cd, guard, target, args)
+		return fmt.Sprintf("#!/bin/sh\n%s\n%sx-terminal-emulator -e sh -c \"%s'%s' %s; exec $SHELL\" &\n", cd, guard, echoSh, target, args)
 	}
 }
 
