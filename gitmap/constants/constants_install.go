@@ -86,6 +86,7 @@ const (
 	FlagInstallStatus  = "status"
 	FlagInstallUpgrade = "upgrade"
 	FlagInstallYes     = "yes"
+	FlagInstallExplain = "explain"
 )
 
 // Install flag descriptions.
