@@ -25,6 +25,9 @@ run: generate ## Build, deploy, and run with optional ARGS (make run ARGS="list 
 lint: ## Check for duplicate type declarations across package files
 	@bash scripts/check-duplicate-types.sh .
 
+fmt: ## Auto-format every .go file under gitmap/ with gofmt
+	@bash ../scripts/format-go.sh
+
 test: generate ## Run tests with report
 	@bash ../run.sh -t
 
