@@ -21,6 +21,8 @@ const (
 	CmdGitHubDesktopAlias = "gd"
 	CmdPull               = "pull"
 	CmdPullAlias          = "p"
+	CmdPullAll            = "pull-all"
+	CmdPullAllAlias       = "pa"
 	CmdRescan             = "rescan"
 	CmdRescanAlias        = "rsc"
 	// CmdRescanSubtree narrowly re-runs `gitmap scan` against the
