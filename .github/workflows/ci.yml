@@ -801,162 +801,91 @@ jobs:
 
   cmd-naming-check:
     # Guards against collision-prone helper names in the single-namespace
-    # gitmap/cmd package. Background: every file in cmd/ shares one Go
-    # namespace, so two files declaring `func invokeRelease(...)` produces
-    # a "redeclared in this block" build break. This check fails fast (no
-    # Go toolchain needed) before lint/test, so contributors get an
-    # actionable rename hint instead of a cryptic vet error later.
+    # gitmap/cmd package — every file shares one Go namespace, so two
+    # files declaring the same func produces "redeclared in this block".
+    # Fails fast (no Go toolchain) before lint/test.
     name: cmd/ Naming Check
     runs-on: ubuntu-latest
     needs: sha-check
     steps:
-      - name: Already validated
-        if: needs.sha-check.outputs.already-built == 'true'
-        run: echo "SHA ${{ github.sha }} already passed cmd/ naming check"
-
-      - uses: actions/checkout@v6
-        if: needs.sha-check.outputs.already-built != 'true'
-
-      - name: Run naming guard
-        if: needs.sha-check.outputs.already-built != 'true'
-        shell: bash
-        run: bash .github/scripts/check-cmd-naming.sh gitmap/cmd
+      - uses: ./.github/actions/policy-check
+        with:
+          already-built: ${{ needs.sha-check.outputs.already-built }}
+          message: cmd/ naming check
+          run: bash .github/scripts/check-cmd-naming.sh gitmap/cmd
 
   legacy-refs-check:
-    # Fails the build if any legacy version string (gitmap-v19, gitmap-v19, # gitmap-legacy-ref-allow
-    # gitmap-v19) leaks back into the repo after the v8 rename. Mirrors # gitmap-legacy-ref-allow
-    # the local `gitmap audit-legacy` command but runs without the Go
-    # toolchain so it gates EVERY CI run, including remixes that haven't
-    # built yet. Lines containing the literal `gitmap-legacy-ref-allow`
-    # marker are exempt — used by the audit-legacy command's own help
-    # text and source comments that legitimately name the old versions.
+    # Fails the build if any legacy version string leaks back into the
+    # repo after the v8 rename. Lines containing the literal
+    # `gitmap-legacy-ref-allow` marker are exempt.
     name: Legacy Refs Check
     runs-on: ubuntu-latest
     needs: sha-check
     steps:
-      - name: Already validated
-        if: needs.sha-check.outputs.already-built == 'true'
-        run: echo "SHA ${{ github.sha }} already passed legacy refs check"
-
-      - uses: actions/checkout@v6
-        if: needs.sha-check.outputs.already-built != 'true'
-
-      - name: Scan repo for legacy version strings
-        if: needs.sha-check.outputs.already-built != 'true'
-        shell: bash
-        run: bash .github/scripts/check-legacy-refs.sh .
+      - uses: ./.github/actions/policy-check
+        with:
+          already-built: ${{ needs.sha-check.outputs.already-built }}
+          message: legacy refs check
+          run: bash .github/scripts/check-legacy-refs.sh .
 
   deploy-layout-check:
-    # Hard guarantee: the deploy-target folder is `gitmap-cli/` (NOT
-    # `gitmap/`). Fails the build if any source file hardcodes a
-    # deploy path with the legacy `gitmap` subfolder instead of
-    # reading from gitmap/constants/deploy-manifest.json. Lines tagged
-    # with `deploy-layout-allow` or containing `legacy` are exempt
-    # (legitimate migration code).
+    # Hard guarantee: deploy-target folder is `gitmap-cli/` (NOT
+    # `gitmap/`). Fails when source files hardcode the legacy
+    # `gitmap` subfolder instead of reading deploy-manifest.json.
     name: Deploy Layout Check
     runs-on: ubuntu-latest
     needs: sha-check
     steps:
-      - name: Already validated
-        if: needs.sha-check.outputs.already-built == 'true'
-        run: echo "SHA ${{ github.sha }} already passed deploy layout check"
-
-      - uses: actions/checkout@v6
-        if: needs.sha-check.outputs.already-built != 'true'
-
-      - name: Scan repo for hardcoded legacy 'gitmap/' deploy paths
-        if: needs.sha-check.outputs.already-built != 'true'
-        shell: bash
-        run: bash .github/scripts/check-deploy-layout.sh .
+      - uses: ./.github/actions/policy-check
+        with:
+          already-built: ${{ needs.sha-check.outputs.already-built }}
+          message: deploy layout check
+          run: bash .github/scripts/check-deploy-layout.sh .
 
   constants-naming-check:
-    # Guards the constants/ package against new constants that lack the
-    # canonical Cmd*/Msg*/Err*/Flag*/Default* prefix. Uses a grandfathered
-    # baseline (.github/scripts/constants-baseline.txt) so existing legacy
-    # prefixes (Doctor*, Git*, Tool*, ...) are exempt — only NEW constants
-    # added after the baseline must comply. Bends the curve toward
-    # convergence without breaking the build today.
+    # Guards constants/ against new constants lacking the canonical
+    # Cmd*/Msg*/Err*/Flag*/Default* prefix. Grandfathered baseline at
+    # .github/scripts/constants-baseline.txt — only NEW constants must
+    # comply.
     name: constants/ Naming Check
     runs-on: ubuntu-latest
     needs: sha-check
     steps:
-      - name: Already validated
-        if: needs.sha-check.outputs.already-built == 'true'
-        run: echo "SHA ${{ github.sha }} already passed constants/ naming check"
-
-      - uses: actions/checkout@v6
-        if: needs.sha-check.outputs.already-built != 'true'
-
-      - name: Install gawk (defensive — script is mawk-portable too)
-        if: needs.sha-check.outputs.already-built != 'true'
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq gawk
-
-      - name: Run constants naming guard
-        if: needs.sha-check.outputs.already-built != 'true'
-        shell: bash
-        run: bash .github/scripts/check-constants-naming.sh
+      - uses: ./.github/actions/policy-check
+        with:
+          already-built: ${{ needs.sha-check.outputs.already-built }}
+          message: constants/ naming check
+          apt-packages: gawk
+          run: bash .github/scripts/check-constants-naming.sh
 
   constants-collision-check:
-    # Static audit of gitmap/constants/constants_*.go that fails when:
-    #   [1] the same identifier is declared in two files (would break go build
-    #       with "redeclared in this block" — exactly the v3.25.0
-    #       HelpGitHubDesktop regression that motivated this guard),
-    #   [2] two identifiers in different files lowercase to the same string
-    #       (latent confusion risk), or
-    #   [3] the same identifier is declared twice in one file.
-    # The Python parser is string-literal aware so SQL keywords (FROM, WHERE,
-    # VALUES, ...) inside multi-line raw-string SQL constants are NEVER
-    # mistaken for identifiers.
+    # Static audit of gitmap/constants/constants_*.go that fails on
+    # cross-file identifier redeclaration, lowercase collisions, or
+    # duplicate identifiers in one file. String-literal aware.
     name: constants/ Collision Check
     runs-on: ubuntu-latest
     needs: sha-check
     steps:
-      - name: Already validated
-        if: needs.sha-check.outputs.already-built == 'true'
-        run: echo "SHA ${{ github.sha }} already passed constants/ collision check"
-
-      - uses: actions/checkout@v6
-        if: needs.sha-check.outputs.already-built != 'true'
-
-      - name: Run constants collision audit
-        if: needs.sha-check.outputs.already-built != 'true'
-        shell: bash
-        run: python3 .github/scripts/check-constants-collisions.py
+      - uses: ./.github/actions/policy-check
+        with:
+          already-built: ${{ needs.sha-check.outputs.already-built }}
+          message: constants/ collision check
+          run: python3 .github/scripts/check-constants-collisions.py
 
   golden-allow-leak-check:
-    # Defends the GITMAP_ALLOW_GOLDEN_UPDATE gate: this env var is the
-    # second of two defense-in-depth keys guarding fixture regeneration,
-    # and project policy is that **CI and shipped scripts must never
-    # set it** — only humans set it locally when they deliberately
-    # regenerate goldens. A leak in a workflow `env:` block, a Make
-    # target, a `.sh`/`.ps1` setup script, or a stray `os.Setenv(...)`
-    # outside the goldenguard package would silently unlock fixture
-    # rewrites on every CI run.
-    #
-    # The check is per-file-type (shell / PowerShell / YAML / Makefile
-    # / Dockerfile / Go) so it matches assignment SYNTAX rather than
-    # the bare token. That avoids ~100% false positives from the many
-    # legitimate mentions in test error messages, comments, helptext
-    # markdown, and the regoldens command's child-process env slice.
-    # Only gitmap/goldenguard/ is whitelisted (it owns the var).
-    #
-    # See spec/05-coding-guidelines/21-golden-fixture-regeneration.md
-    # §6 (CI Posture) for the policy this enforces.
+    # Defends GITMAP_ALLOW_GOLDEN_UPDATE: this env var is the second of
+    # two defense-in-depth keys guarding fixture regeneration, and
+    # CI/shipped scripts must never set it. See
+    # spec/05-coding-guidelines/21-golden-fixture-regeneration.md §6.
     name: GITMAP_ALLOW_GOLDEN_UPDATE Leak Check
     runs-on: ubuntu-latest
     needs: sha-check
     steps:
-      - name: Already validated
-        if: needs.sha-check.outputs.already-built == 'true'
-        run: echo "SHA ${{ github.sha }} already passed golden-allow leak check"
-
-      - uses: actions/checkout@v6
-        if: needs.sha-check.outputs.already-built != 'true'
-
-      - name: Run golden-allow leak guard
-        if: needs.sha-check.outputs.already-built != 'true'
-        shell: bash
-        run: bash .github/scripts/check-no-golden-allow-leak.sh
+      - uses: ./.github/actions/policy-check
+        with:
+          already-built: ${{ needs.sha-check.outputs.already-built }}
+          message: golden-allow leak check
+          run: bash .github/scripts/check-no-golden-allow-leak.sh
 
   generate-check:
     # Guarantees that every Cmd* constant added to a scanned constants_*.go
