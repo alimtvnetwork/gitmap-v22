@@ -5,7 +5,7 @@
 **Git repository scanner, manager, and navigator CLI**
 
 [![CI](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml)
-[![golangci-lint](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml)
+
 [![Vulncheck](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/vulncheck.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/vulncheck.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/alimtvnetwork/gitmap-v19?style=flat-square&label=version)](https://github.com/alimtvnetwork/gitmap-v19/releases)
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
