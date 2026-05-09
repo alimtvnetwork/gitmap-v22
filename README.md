@@ -5,8 +5,10 @@
 **Git repository scanner, manager, and navigator CLI**
 
 [![CI](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml)
-
-[![Vulncheck](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/vulncheck.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/vulncheck.yml)
+[![lint](https://byob.yarr.is/alimtvnetwork/gitmap-v19/ci-lint)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml)
+[![tests](https://byob.yarr.is/alimtvnetwork/gitmap-v19/ci-tests)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml)
+[![vulncheck](https://byob.yarr.is/alimtvnetwork/gitmap-v19/ci-vulncheck)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml)
+[![build](https://byob.yarr.is/alimtvnetwork/gitmap-v19/ci-build)](https://github.com/alimtvnetwork/gitmap-v19/actions/workflows/ci.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/alimtvnetwork/gitmap-v19?style=flat-square&label=version)](https://github.com/alimtvnetwork/gitmap-v19/releases)
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](https://github.com/alimtvnetwork/gitmap-v19)
