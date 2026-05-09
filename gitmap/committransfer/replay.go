@@ -30,13 +30,21 @@ func Replay(plan ReplayPlan, opts Options) (ReplayResult, error) {
 
 			continue
 		}
-		newSHA, err := replayOne(plan, commit, opts)
+		newSHA, emptyAfterSnapshot, err := replayOne(plan, commit, opts)
 		if err != nil {
 			return res, fmt.Errorf("commit %d/%d (%s): %w",
 				i+1, len(plan.Commits), commit.ShortSHA, err)
 		}
 		if newSHA == "" {
 			res.SkippedEmpty++
+			if emptyAfterSnapshot {
+				// Surface which source SHA disappeared so the user
+				// can reconcile against `git log`. Issue:
+				// .lovable/memory/issues/2026-05-09-commit-transfer-count-mismatch.md
+				fmt.Fprintf(os.Stdout,
+					"%s [%d/%d] %s → empty (snapshot tree unchanged on target)\n",
+					opts.LogPrefix, i+1, len(plan.Commits), commit.ShortSHA)
+			}
 
 			continue
 		}
@@ -48,25 +56,30 @@ func Replay(plan ReplayPlan, opts Options) (ReplayResult, error) {
 }
 
 // replayOne is the per-commit step: checkout in source, snapshot copy
-// into target, stage, commit (preserving source author).
-func replayOne(plan ReplayPlan, commit SourceCommit, opts Options) (string, error) {
+// into target, stage, commit (preserving source author). The returned
+// emptyAfterSnapshot flag distinguishes "intentional NoCommit skip"
+// (false) from "snapshot produced no diff" (true) so the caller can
+// log the latter — silent empty-skips were the root cause behind the
+// 212→150 commit-count mismatch (issue 2026-05-09).
+func replayOne(plan ReplayPlan, commit SourceCommit, opts Options) (string, bool, error) {
 	if err := checkoutDetached(plan.SourceDir, commit.SHA); err != nil {
-		return "", fmt.Errorf("checkout source %s: %w", commit.ShortSHA, err)
+		return "", false, fmt.Errorf("checkout source %s: %w", commit.ShortSHA, err)
 	}
 	if err := snapshotCopy(plan.SourceDir, plan.TargetDir, opts); err != nil {
-		return "", fmt.Errorf("snapshot copy: %w", err)
+		return "", false, fmt.Errorf("snapshot copy: %w", err)
 	}
 	if opts.NoCommit {
-		return "", nil
+		return "", false, nil
 	}
 	if err := addAll(plan.TargetDir); err != nil {
-		return "", fmt.Errorf("git add -A target: %w", err)
+		return "", false, fmt.Errorf("git add -A target: %w", err)
 	}
 	if !hasStagedChanges(plan.TargetDir) {
-		return "", nil
+		return "", true, nil
 	}
+	sha, err := commitWithEnv(plan.TargetDir, commit.Cleaned, commit.Author, commit.AuthorAt)
 
-	return commitWithEnv(plan.TargetDir, commit.Cleaned, commit.Author, commit.AuthorAt)
+	return sha, false, err
 }
 
 // tallySkip routes a skip cause into the right counter.
