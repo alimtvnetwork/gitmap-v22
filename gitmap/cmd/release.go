@@ -36,6 +36,9 @@ func runRelease(args []string) {
 
 	// Auto-fallback when not inside a Git repo.
 	if !release.IsInsideGitRepo() {
+		if tryRunReleaseInRecentClone(args) {
+			return
+		}
 		if shouldAutoBumpMinor(version, bump, commit, branch) && tryRunReleaseScanDir(yes) {
 			return
 		}
