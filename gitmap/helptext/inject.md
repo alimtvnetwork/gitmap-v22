@@ -10,6 +10,25 @@ in `cd`, `list`, etc.
     gitmap inject              # inject the current working directory
     gitmap inject <folder>     # inject the given folder
     gitmap inj   <folder>      # short alias
+    gitmap inject --force      # re-register Desktop + VS Code (alias: -f)
+
+## Idempotency (--force / -f)
+
+`inject` (and its sibling `gitmap open`) stamp two timestamps on the
+`Repo` row each time they register the folder with an external tool:
+
+| Column | Set when |
+|--------|----------|
+| `LastInjectedDesktopAt` | GitHub Desktop registration ran |
+| `LastInjectedVSCodeAt`  | VS Code window opened |
+
+On subsequent invocations, if a stamp is already non-empty the
+matching action is skipped with a one-line notice naming the tool +
+its previous timestamp. Pass `--force` (`-f`) to bypass both gates
+and re-stamp to "now" after the side effects run. The check is
+per-tool: it's valid to skip Desktop while still re-opening VS Code
+(or vice versa).
+
 
 ## Supported `<folder>` formats
 
