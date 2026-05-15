@@ -27,6 +27,7 @@ func printGroupUtilities() {
 	fmt.Println(constants.HelpMakePrivate)
 	fmt.Println(constants.HelpCloneFixRepo)
 	fmt.Println(constants.HelpCloneFixRepoPub)
+	fmt.Println(constants.HelpOpen)
 	fmt.Println(constants.HelpHelp)
 }
 

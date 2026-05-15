@@ -1,65 +1,85 @@
-## Commit-In Tag Mirroring & Auto Release Branches — Implementation Plan
+# Plan: Inject Idempotency, `gitmap open`, fix-repo skip, auto shell wrapper
 
-Source: `spec/03-commit-in/08-tag-mirroring-and-release-branches.md` (frozen).
-Memory: `mem://features/commit-in-tag-mirroring`.
+Five user-facing changes to the Go CLI plus migration, spec, and memory updates. Version bump: **v4.43.0**.
 
-The spec gates implementation on this plan being greenlit, so no code is written until you approve.
+## 1. `cfrp` / `cfr` skip fix-repo on no-vN suffix
 
-### Scope at a glance
+**Behavior:** If repo name has no `-vN` suffix, print `fix-repo: skipped (repo has no -vN suffix, nothing to rewrite)` and continue to make-public. New flag `--require-version` (cfr/cfrp only) restores the strict E_NO_VERSION_SUFFIX exit.
 
-- Mirror annotated git tags from the source repo onto the destination NewSha during `commit-in`.
-- For tags matching `constants.VersionTagPattern`, also create `release/<TagName>` branches at the NewSha.
-- Persist `(MirroredTagName, MirroredReleaseBranch)` per `RewrittenCommit` row.
-- Three new flags: `--tags`, `--no-release-branch`, `--release-branch-prefix`. Profile JSON adds `TagsMode`, `CreateReleaseBranch`, `ReleaseBranchPrefix`.
-- N-tags-per-commit: extra annotated tags become sibling `Skipped / AdditionalTagAlias` rows.
+**Files:**
+- `gitmap/cmd/clonefixrepo.go` — pre-check repo name; skip with notice unless `--require-version`.
+- `gitmap/cmd/fixrepo*.go` — add a `SkipIfNoVersion(path) (skipped bool, err error)` helper that returns the "no version" condition without printing the error banner.
+- `gitmap/constants/constants_clonefixrepo.go` — add `FlagRequireVersion`, `MsgFixRepoSkippedNoVersion`.
 
-### Implementation (8 ordered chunks, each ≤ ~150 LOC across small files)
+## 2. Idempotent inject with `--force` / `-f`
 
-1. **Migration 006 + enum seed.** New `gitmap/store/migrations/006_commit_in_tag_mirroring.sql` (or `migrate_commitin_tagmirror.go` matching the existing migration style). Idempotent `ALTER TABLE RewrittenCommit ADD COLUMN MirroredTagName / MirroredReleaseBranch`, two indexes, `TagsMode` lookup table seeded `Annotated|All|None`, and a new `SkipReason.AdditionalTagAlias` row. Bump schema version. Idempotent-migration ERD parity test updated.
+**DB schema (migration 014):**
+```
+ALTER TABLE Repo ADD COLUMN LastInjectedDesktopAt TEXT;
+ALTER TABLE Repo ADD COLUMN LastInjectedVSCodeAt TEXT;
+```
 
-2. **Constants & enums.** Add CLI ID + flag default constants in `constants_commitin.go` / `constants_cli.go` (`FlagTags`, `FlagNoReleaseBranch`, `FlagReleaseBranchPrefix`, `DefaultTagsMode`, `DefaultReleaseBranchPrefix`). Reuse existing `constants.VersionTagPattern` and `constants.ReleaseBranchPrefix` (no siblings). Add `TagsMode` Go enum in `gitmap/cmd/commitin/enums.go`.
+**Behavior:**
+- Every clone variant + `inject` checks the two timestamps before invoking Desktop / VS Code.
+- If the side has a non-null timestamp AND the path still exists in projects.json (VS Code) / matches stored path (Desktop), **skip** with: `Desktop: already injected (use --force to re-add)`.
+- `--force` / `-f` bypasses both checks and re-runs both side-effects.
+- On success, stamp `time.Now().UTC().Format(time.RFC3339)` into the corresponding column.
 
-3. **Flag parsing + validation.** Extend `parse_flags.go` / `parse_validate.go` for the three flags, with the spec's two validation errors (`--tags=None` + sibling flag → exit 2; prefix not ending `/` → exit 2). Test in `parse_test.go` (table-driven).
+**Files:**
+- `gitmap/store/migrate*.go` — new migration 014.
+- `gitmap/model/repo.go` — add the two `*string` fields.
+- `gitmap/store/repo.go` — add `MarkDesktopInjected(repoID)` / `MarkVSCodeInjected(repoID)` / `IsDesktopInjected(repoID)` / `IsVSCodeInjected(repoID)`.
+- `gitmap/desktop/desktop.go` + `gitmap/vscode/*.go` — accept a `force bool` param; gate on store helpers.
+- `gitmap/cmd/inject.go`, `gitmap/cmd/clone*.go`, `gitmap/cmd/clonefixrepo.go` — parse `--force` / `-f` and thread through.
+- `gitmap/constants/constants_inject.go` — `FlagForce`, `FlagForceShort`, skip messages.
 
-4. **Profile JSON.** Extend `profile/` types + resolver to read `TagsMode`, `CreateReleaseBranch`, `ReleaseBranchPrefix` with the standard CLI > profile > default precedence. Round-trip test.
+## 3. New `gitmap open` command
 
-5. **gitutil helpers.** New small file `gitmap/gitutil/tagmirror.go` (≤200 LOC):
-   - `AnnotatedTagsAt(repo, sha) ([]TagInfo, error)` — uses `git for-each-ref refs/tags --contains <sha>` + `git cat-file -t` filter, returns tagger ident/date/message verbatim.
-   - `CreateAnnotatedTag(repo, name, sha, ident, date, message) error` — wraps `git tag -a` with `GIT_COMMITTER_DATE` / `GIT_TAGGER_DATE` env pin.
-   - `CreateBranchAt(repo, name, sha) error` — `git branch <name> <sha>`, idempotent (no-op if already at sha).
-   Each function ≤15 lines per the project's code-style rule. Unit tests with a temp repo fixture.
+**Spec:** Detects current repo from cwd via `git remote get-url origin`, ensures it's in DB (auto-inject minimal record if missing), then launches **both** GitHub Desktop AND VS Code on that path. Honors `--force` to re-inject. Aliases: `op`.
 
-6. **Replay integration (stage 14).** In `gitmap/cmd/commitin/replay/replay.go` (or a new `tagmirror.go` sibling so replay.go stays under the 200-line limit), add inline post-`ApplyCommit` logic per spec §8.4. Single SQLite transaction with the `RewrittenCommit` insert. `--dry-run` short-circuits writes but still records "would mirror" in the run-log.
+**Files:**
+- `gitmap/cmd/open.go` — new (≤200 lines).
+- `gitmap/constants/constants_open.go` — new.
+- `gitmap/main.go` — register `CmdOpen` route + `// gitmap:cmd top-level` marker.
+- `gitmap/helptext/open.md` — new.
+- `gitmap/completion/*` — auto-regenerated by marker scan.
+- `spec/04-generic-cli/31-open-command.md` — new spec.
 
-7. **Run-log + results.** Extend `runlog/tagreplay.go` to surface mirrored tag/branch in summary output and the JSON run-log shape. New result fields are additive (no breaking change to existing JSON consumers).
+## 4. Auto-install shell wrapper
 
-8. **Acceptance tests T1–T7.** New `gitmap/cmd/commitin/replay/tagmirror_test.go` plus end-to-end coverage in `gitmap/cmd/commitin/e2e/` driving each row of spec §8.7's matrix against a real temp source repo.
+**Two changes:**
 
-### Validation gates I will run before marking done
+a) **Installer integration:** `gitmap self-install` (cmd/selfinstall.go) and `init.ps1` / `init.sh` call `gitmap setup` as a final non-fatal step. Setup is already idempotent (marker `# gitmap shell wrapper v2`), so re-runs are safe.
 
-- `go test ./...` (full suite)
-- `golangci-lint run ./...`
-- `goldenguard` determinism pre-check on any new fixtures
-- `gitmap fix-repo --strict` not applicable (no version bump in this feature)
-- File-size + function-size lint enforced by repo-policy CI (already gated)
+b) **Better failure UX:** When `gitmap cd` detects `GITMAP_WRAPPER` is unset, current message becomes:
+```
+! Shell wrapper not active.
+  Auto-fix: . $PROFILE   (PowerShell)
+            source ~/.bashrc / ~/.zshrc   (Bash/Zsh)
+  Or restart your terminal. The wrapper is already installed in your profile.
+```
+We cannot re-source the parent shell from a child — explicit reminder only.
 
-### Out of scope (intentionally deferred)
+**Files:**
+- `gitmap/cmd/selfinstall.go` — append `runSetup()` step.
+- `init.ps1`, `init.sh` — append `gitmap setup` call (best-effort, swallow errors).
+- `gitmap/constants/constants_cd.go` — updated wrapper-warning text.
 
-- Lightweight-tag dereferencing nuances beyond `--tags=All` literal mirror.
-- Conflict policy when destination already has a tag with the same name (treated as failure → `PartiallyFailed`, no overwrite — matches §02 conformance).
-- Cross-repo tag pushing — `commit-in` writes locally only; pushing remains a separate `gitmap` command.
+## 5. Memory + spec + version bump
 
-### Risk register
+- `mem://features/inject-idempotency` — new.
+- `mem://features/open-command` — new.
+- `mem://features/fix-repo-skip-no-version` — new.
+- `mem://index.md` — add three references; update Core "Current version: v4.43.0".
+- `spec/02-app-issues/25-cd-shell-wrapper-not-active.md` — new (auto-install resolution).
+- `spec/02-app-issues/26-cfrp-no-version-suffix-hard-error.md` — new (skip-with-notice resolution).
+- Version bump: edit `gitmap/constants/version.go` (or wherever `constants.Version` lives) → `v4.43.0`. README badge unchanged.
 
-| Risk | Mitigation |
-|------|-----------|
-| Tagger date hashing changes commit identity | We do NOT touch the commit; only the tag object. Verified against §8.1's "re-create the tag, never re-point" rule. |
-| Multiple annotated tags per commit | Spec §8.5 N-tags rule: sibling `Skipped/AdditionalTagAlias` rows, NewSha shared. Tested in T7. |
-| Migration on existing live DBs | `ADD COLUMN` is idempotent in SQLite; migration runner pattern (see `migrate_commitin.go`) wraps in `IF NOT EXISTS` guard. |
-| Schema-version + ERD parity test drift | Update `erd_parity_test.go` in chunk 1 alongside the migration. |
+## Technical notes
 
-### Delivery cadence
-
-I will deliver the 8 chunks one per `next` so each lands as a reviewable, test-green increment. Chunk 1 (migration + enum seed) ships first because every later chunk depends on the new columns existing.
-
-**Greenlight needed:** approve this plan, push back on any chunk, or pick a different memory follow-up to tackle instead.
+- **Migration safety:** Both new columns are nullable TEXT, defaulting to NULL. Existing rows are treated as "never injected" — first `inject`/`open` after upgrade will run both side-effects once, then mark.
+- **Desktop "already added" check:** GitHub Desktop has no public CLI to query installed repos. We rely solely on the DB timestamp + path-existence check; `--force` is the escape hatch.
+- **VS Code check:** Cross-validate against `projects.json` rootPath presence before trusting the DB timestamp (handles the case where the user removed the entry from VS Code Project Manager UI).
+- **`gitmap open` cwd detection:** Reuses `git remote get-url origin` parser already in `inject.go`. If no origin, error: `open: not inside a git repo with origin remote`.
+- **Wrapper auto-install ordering:** `self-install` runs setup AFTER PATH is wired, so the `gitmap` binary inside `setup`'s generated wrapper resolves correctly.
+- **No breaking changes:** All existing flags + exit codes preserved. `--require-version` is opt-in.

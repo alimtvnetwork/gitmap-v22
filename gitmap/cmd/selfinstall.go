@@ -55,7 +55,24 @@ func runSelfInstall(args []string) {
 	defer os.Remove(tmpPath)
 	executeInstallScript(scriptName, tmpPath, dir, opts)
 	fmt.Print(constants.MsgSelfInstallDone)
+	autoRunSetupAfterInstall()
 	fmt.Print(constants.MsgSelfInstallReminder)
+}
+
+// autoRunSetupAfterInstall invokes `gitmap setup` as a final
+// best-effort step so the shell wrapper (`gcd` / `gitmap` function)
+// is installed without the user needing a second command. The
+// underlying setup is idempotent (marker `# gitmap shell wrapper v2`),
+// so re-running on every install is safe. Failures are non-fatal —
+// the install itself already succeeded by this point.
+func autoRunSetupAfterInstall() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "  (setup auto-run skipped: %v)\n", r)
+		}
+	}()
+	fmt.Println("\n  → Running 'gitmap setup' to install shell wrapper + completions...")
+	runSetup(nil)
 }
 
 // acquireSelfInstallLock takes the duplicate-install guard. On conflict

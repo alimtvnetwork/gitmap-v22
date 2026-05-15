@@ -42,7 +42,7 @@ func runCloneFixRepoPub(args []string) {
 // runCloneFixRepoPipeline is the shared core. `makePublic` controls
 // whether the optional 3rd step (visibility flip) runs.
 func runCloneFixRepoPipeline(args []string, makePublic bool) {
-	url, folderName, noVSCodeSync := parseCloneFixRepoArgs(args)
+	url, folderName, noVSCodeSync, requireVersion := parseCloneFixRepoArgs(args)
 	if len(url) == 0 {
 		fmt.Fprint(os.Stderr, constants.ErrCloneFixRepoUsage)
 		os.Exit(constants.ExitCloneFixRepoBadFlag)
@@ -57,28 +57,49 @@ func runCloneFixRepoPipeline(args []string, makePublic bool) {
 		os.Exit(constants.ExitCloneFixRepoChdir)
 	}
 
-	runChainedGitmapStep([]string{constants.CmdFixRepo, "--" + constants.FixRepoFlagAll})
+	maybeRunFixRepoStep(absPath, requireVersion)
 	if makePublic {
 		runChainedGitmapStep([]string{constants.CmdMakePublic, "--" + constants.FlagVisYes})
 	}
 	fmt.Printf(constants.MsgCloneFixRepoDone, absPath)
 }
 
-// parseCloneFixRepoArgs returns (url, folderName). The first
-// non-flag arg is the URL; an optional second non-flag arg is the
-// destination folder. Unknown flags are ignored at this layer
-// because clone itself accepts a wide flag surface.
-//
-// The cfr/cfrp pipelines also recognize `--no-vscode-sync` so the
-// projects.json update at the end of the inner clone step can be
-// suppressed in CI / headless runs without VS Code installed.
-func parseCloneFixRepoArgs(args []string) (string, string, bool) {
+// maybeRunFixRepoStep runs `fix-repo --all` only when the repo folder
+// name carries a `-vN` suffix. Repos without a version suffix have
+// nothing the rewriter can target, so we skip with a one-line notice.
+// `--require-version` restores the strict (exit-4) failure mode for
+// CI pipelines that want the old contract.
+func maybeRunFixRepoStep(absPath string, requireVersion bool) {
+	parsed := clonenext.ParseRepoName(filepath.Base(absPath))
+	if parsed.HasVersion {
+		runChainedGitmapStep([]string{constants.CmdFixRepo, "--" + constants.FixRepoFlagAll})
+
+		return
+	}
+	if requireVersion {
+		fmt.Fprintf(os.Stderr, constants.ErrCloneFixRepoNeedVersion, parsed.BaseName)
+		os.Exit(constants.ExitCloneFixRepoChainFailed)
+	}
+	fmt.Printf(constants.MsgCloneFixRepoSkipNoVer, parsed.BaseName)
+}
+
+// parseCloneFixRepoArgs returns (url, folderName, noVSCodeSync, requireVersion).
+// First non-flag arg is the URL; second non-flag is the destination folder.
+// Recognized flags: --no-vscode-sync, --require-version.
+func parseCloneFixRepoArgs(args []string) (string, string, bool, bool) {
 	positional := make([]string, 0, len(args))
 	noVSCodeSync := false
+	requireVersion := false
 	syncFlag := "--" + constants.FlagNoVSCodeSync
+	reqFlag := "--" + constants.FlagRequireVersion
 	for _, a := range args {
 		if a == syncFlag {
 			noVSCodeSync = true
+
+			continue
+		}
+		if a == reqFlag {
+			requireVersion = true
 
 			continue
 		}
@@ -95,7 +116,7 @@ func parseCloneFixRepoArgs(args []string) (string, string, bool) {
 		folder = positional[1]
 	}
 
-	return url, folder, noVSCodeSync
+	return url, folder, noVSCodeSync, requireVersion
 }
 
 // resolveCloneTargetFolder mirrors the folder-naming logic in
