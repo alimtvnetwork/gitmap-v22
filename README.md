@@ -1484,7 +1484,7 @@ bypass; combine with `--prefer-left` / `--prefer-right` /
 | Command | Alias | Description |
 |---------|-------|-------------|
 | `replace` | `rpl` | Repo-wide find/replace across every text file. Literal swap or version-suffix bump driven by the `-vK` git remote URL. `--audit` reports without writing. |
-| `fix-repo` | `fr` | Rewrite prior `{base}-vN` versioned-repo-name tokens to the current version. Negative-lookahead guards `-v1` from matching `-v18`. `--strict` runs `go test` on touched packages. |
+| `fix-repo` | `fr` | Rewrite prior `{base}-vN` versioned-repo-name tokens to the current version. Also rewrites bare `{base}` tokens (no `-vN` suffix) when v1 is in the target span, for repos that shipped pre-versioned. Negative-lookahead guards `-v1` from matching `-v18`; bare-base sweep is word-boundary guarded so `{base}.js`, `{base}_alt`, `{base}-v2`, and `myimg-pdf` are left untouched. `--strict` runs `go test` on touched packages. |
 | `clone-fix-repo` | `cfr` | One-shot: `clone <url>` then `fix-repo --all` inside the new folder. Versioned URLs auto-flatten. |
 | `clone-fix-repo-pub` | `cfrp` | Same as `cfr`, plus `make-public --yes` at the end. |
 | `make-public` | — | Make the current repo **public** on GitHub or GitLab via the matching CLI (`gh` / `glab`). Verifies visibility post-edit. |
@@ -1857,6 +1857,24 @@ gitmap r       [version] [flags]
 ### Changelog (recent versions)
 
 Concise, grouped per version. Each entry calls out **💥 Breaking**, **✨ Enhancements**, and **🐛 Fixes**. Versions with nothing in a category omit it. Full history lives in [`CHANGELOG.md`](CHANGELOG.md); query it from the CLI with `gitmap changelog vX.Y.Z` or `gitmap cl --limit 5`.
+
+#### v5.10.0 — 2026-05-16 — PowerShell wrapper loads last
+
+- 🐛 **Fixes:** `gitmap setup` / installer rewrites now move the managed `gitmap`/`gcd` PowerShell command wrapper to the end of `$PROFILE`. This stops older `# gitmap shell wrapper v2` blocks or hand-edited snippets appearing later in the profile from overriding the fresh wrapper and leaving `gitmap cd` stuck on the raw-exe warning.
+
+#### v5.9.0 — 2026-05-16 — Harden PowerShell `gitmap cd` activation
+
+- 🐛 **Fixes:**
+  - Windows installers now write the `gitmap`/`gcd` command wrapper to **all** standard current-user PowerShell profile files (Windows PowerShell + PowerShell 7+), not only the one profile visible to the installer host.
+  - Installer also loads the wrapper into the current session even when PATH was already present; release ZIP shim supports the same `GITMAP_HANDOFF_FILE` handoff as the generated shim.
+
+#### v5.8.0 — 2026-05-16 — `fix-repo` bare-base rewrite for pre-versioned v1 repos
+
+- ✨ **Enhancements:** `gitmap fix-repo` now rewrites bare `{base}` occurrences (not just `{base}-v1`) when v1 is in the target span. Pre-versioned remotes shipped without a `-v1` suffix, so downstream references read e.g. `img-pdf` rather than `img-pdf-v1`; the previous rewriter skipped them entirely and reported `changed: 0`. The bare-base sweep is guarded by strict word-boundary checks (alnum / `_` / `-` / `.`) so `{base}-v2`, `{base}.js`, `{base}_alt`, and `myimg-pdf` are left untouched. Skipped automatically when v1 is not in the target set.
+
+#### v5.7.0 — 2026-05-16 — Ship PowerShell shim in release installs
+
+- 🐛 **Fixes:** Windows release ZIPs now contain both `gitmap.exe` **and** `gitmap.ps1`, and the release-specific `install.ps1` moves the shim beside the exe. Users installing from release assets previously never received `gitmap.ps1`, so PowerShell resolved the raw exe and printed the wrapper-not-active warning even after upgrading.
 
 #### v3.52.0 — 2026-04-21 — CI lint baseline cache controls (docs)
 
