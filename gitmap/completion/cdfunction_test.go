@@ -211,3 +211,17 @@ func TestRenderPowerShellCommandShimPinsInstalledExe(t *testing.T) {
 		}
 	}
 }
+
+// countCDFunctionStartMarkers counts lines that exactly start with the
+// managed start marker, excluding the end marker (which has the start
+// marker as a prefix and would otherwise inflate the count).
+func countCDFunctionStartMarkers(text string) int {
+	count := 0
+	for _, line := range strings.Split(text, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == constants.CDFuncMarker {
+			count++
+		}
+	}
+	return count
+}
