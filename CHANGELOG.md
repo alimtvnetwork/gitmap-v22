@@ -1,5 +1,15 @@
 # Changelog
 
+## v5.1.0 — (2026-05-16) — Fix cfrp remote-based version detection
+
+### Fixed
+
+- `gitmap clone-fix-repo` / `cfrp` now decide whether to run `fix-repo --all`
+  from the cloned Git remote repo name, not the flattened local destination
+  folder. Cloning `gitmap-v20` into `gitmap/` now correctly runs the rewrite
+  instead of falsely reporting that `gitmap` has no `-vN` suffix.
+- Bumped `Version` constant to `5.1.0` (Go) and `VERSION` to `v5.1.0` (web).
+
 ## v4.44.0 — (2026-05-16) — Minor version bump; re-pin root README install snippets and version matrix to v4.44.0
 
 - Bumped `Version` constant to `4.44.0` (Go) and `VERSION` to `v4.44.0` (web)
