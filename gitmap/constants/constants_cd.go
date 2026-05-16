@@ -48,7 +48,7 @@ const (
 const CDFuncMarker = "# gitmap command wrapper v1"
 
 // CDFuncMarkerEnd closes the managed command-wrapper block for rewrites.
-const CDFuncMarkerEnd = "# gitmap command wrapper v1 end"
+const CDFuncMarkerEnd = "# end gitmap command wrapper v1"
 
 // Legacy markers identify older/broken command-wrapper blocks that must be
 // replaced instead of causing setup to skip installation.
