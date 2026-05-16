@@ -121,7 +121,8 @@ gitmap() {
     return $status
   fi
   command gitmap "$@"
-}`
+}
+# gitmap command wrapper v1 end`
 
 // CDFuncZsh installs gitmap and gcd wrappers for Zsh.
 const CDFuncZsh = `gcd() {
@@ -167,7 +168,8 @@ gitmap() {
     return $status
   fi
   command gitmap "$@"
-}`
+}
+# gitmap command wrapper v1 end`
 
 // CDFuncPowerShell installs gitmap and gcd wrappers for PowerShell.
 const CDFuncPowerShell = `function gcd {
