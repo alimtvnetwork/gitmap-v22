@@ -234,7 +234,8 @@ function gitmap {
     Remove-Item -LiteralPath $handoff -ErrorAction SilentlyContinue
     Remove-Item Env:\GITMAP_HANDOFF_FILE -ErrorAction SilentlyContinue
   }
-}`
+}
+# gitmap command wrapper v1 end`
 
 // CD function messages.
 const (
