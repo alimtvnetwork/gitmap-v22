@@ -1,5 +1,18 @@
 # Changelog
 
+## v5.2.0 — (2026-05-16) — Gate pinned-install snippet to gitmap-vN repos only
+
+### Fixed
+
+- `gitmap release` no longer appends the gitmap pinned-version PowerShell/bash
+  installer snippet to release bodies of unrelated repositories. The snippet
+  is now gated by the same `ShouldPrintInstallHint` check used by the
+  terminal install hint: it only renders when the current repo's remote
+  matches `alimtvnetwork/gitmap-vN` (versioned gitmap source repos).
+- Root cause: `uploadToGitHub` in `gitmap/release/workflowgithub.go` called
+  `AppendPinnedInstallSnippet` unconditionally, so every release body (in any
+  repo) got the gitmap installer block plus the version tag header.
+
 ## v5.1.0 — (2026-05-16) — Fix cfrp remote-based version detection
 
 ### Fixed
