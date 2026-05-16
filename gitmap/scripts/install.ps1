@@ -889,6 +889,11 @@ function Add-ToPath([string]$dir) {
         else {
             Write-Step "Already in PowerShell profile."
         }
+
+        if (Add-CommandWrapperToProfile $psProfilePath $dir) {
+            Write-OK "Added gitmap cd command wrapper to PowerShell profile."
+            $modified += "PowerShell command wrapper"
+        }
     }
 
     # --- 3. Git Bash profiles (~/.bashrc, ~/.bash_profile) ---
