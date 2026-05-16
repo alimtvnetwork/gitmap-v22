@@ -82,6 +82,10 @@ func tokenToANSI() *strings.Replacer {
 		TokCyanClose, constants.ColorReset,
 		TokMutedOpen, constants.ColorDim,
 		TokMutedClose, constants.ColorReset,
+		TokGreenOpen, constants.ColorGreen,
+		TokGreenClose, constants.ColorReset,
+		TokMagentaOpen, constants.ColorMagenta,
+		TokMagentaClose, constants.ColorReset,
 	)
 }
 
