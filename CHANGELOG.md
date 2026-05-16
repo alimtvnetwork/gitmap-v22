@@ -1,5 +1,32 @@
 # Changelog
 
+## v5.12.0 — (2026-05-16) — README alias mapping for `pull-release` family
+
+### Docs
+- Root `README.md` Release & Versioning table now includes a dedicated
+  `pull-release` row listing the canonical short alias `pr` alongside the
+  three legacy spellings (`release-pull`, `relp`, `rlp`).
+- New "Alias mapping — `pull-release` family (v5.6.0+)" sub-table maps every
+  legacy and canonical token to its routing target with status
+  (canonical / legacy) and notes, including the `prune` short alias rename
+  from `pr` → `prn`. This is the single source of truth users can link to
+  when scripts or CI still reference the legacy names.
+- Copy-paste block under the table demonstrates every spelling resolving to
+  the same handler so users can sanity-check their muscle memory at a glance.
+- Release History & Info table corrected: `prune` short alias is now `prn`
+  (was incorrectly still shown as `pr` after the v5.6.0 rename).
+- Right-click context-menu table row renamed "Release pull" → "Pull release"
+  and the `gitmap pull-release` invocation now calls out the legacy alias
+  passthrough.
+
+### Notes
+- No code change — alias wiring already lives in
+  `gitmap/constants/constants_cli.go` (`CmdReleasePullAlias..Alias4`) and
+  `gitmap/constants/constants_prune.go` (`CmdPruneAlias = "prn"`) as of
+  v5.6.0. This release only synchronizes the README so the docs match the
+  binary.
+
+
 ## v5.11.0 — (2026-05-16) — `--no-color` / `--color` flag for help output
 
 ### Added
