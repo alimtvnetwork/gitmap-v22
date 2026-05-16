@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.9.0 — (2026-05-16) — Harden PowerShell `gitmap cd` activation
+
+### Fixed
+- Windows installers now write the `gitmap`/`gcd` command wrapper to all standard
+  current-user PowerShell profile files, not only the one profile visible to the
+  installer host. This prevents new terminals from falling back to raw
+  `gitmap.exe` and printing the wrapper-not-active warning.
+- The installer also loads the command wrapper into the current installer session
+  even when PATH was already present, and the release ZIP shim now supports the
+  same handoff behavior as the generated shim.
+
 ## v5.8.0 — (2026-05-16) — fix-repo bare-base rewrite for pre-versioned v1 repos
 
 ### Fixed

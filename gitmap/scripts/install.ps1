@@ -855,6 +855,18 @@ function Install-CommandWrapperForSession([string]$dir) {
     Invoke-Expression (Get-GitmapCommandWrapperBlock $dir)
 }
 
+function Resolve-PowerShellProfileTargets {
+    $targets = @()
+    if ($PROFILE) { $targets += $PROFILE }
+    if ($env:USERPROFILE) {
+        $targets += (Join-Path $env:USERPROFILE "Documents\PowerShell\profile.ps1")
+        $targets += (Join-Path $env:USERPROFILE "Documents\PowerShell\Microsoft.PowerShell_profile.ps1")
+        $targets += (Join-Path $env:USERPROFILE "Documents\WindowsPowerShell\profile.ps1")
+        $targets += (Join-Path $env:USERPROFILE "Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1")
+    }
+    return @($targets | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+}
+
 function Update-PowerShellProfilePathLine([string]$profilePath, [string]$dir) {
     $marker = "# gitmap-path"
     $exportLine = "`$env:PATH = `"$dir;`$env:PATH`" $marker"
@@ -947,13 +959,16 @@ function Add-ToPath([string]$dir) {
             Write-Step "Already in PowerShell profile."
         }
 
-        if (Add-CommandWrapperToProfile $psProfilePath $dir) {
-            Write-OK "Added gitmap cd command wrapper to PowerShell profile."
-            $modified += "PowerShell command wrapper"
+        $wrapperProfiles = Resolve-PowerShellProfileTargets
+        foreach ($wrapperProfile in $wrapperProfiles) {
+            if (Add-CommandWrapperToProfile $wrapperProfile $dir) {
+                Write-OK "Added gitmap cd command wrapper to PowerShell profile: $wrapperProfile"
+            }
         }
-
-        Install-CommandWrapperForSession $dir
+        if ($wrapperProfiles.Count -gt 0) { $modified += "PowerShell command wrapper" }
     }
+
+    Install-CommandWrapperForSession $dir
 
     # --- 3. Git Bash profiles (~/.bashrc, ~/.bash_profile) ---
     $homeDir = $env:USERPROFILE

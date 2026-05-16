@@ -19,7 +19,7 @@ Clone-next flattens by default (v2.75.0+): clones into base name folder, tracks 
 Clone-next `-f` / `--force` (v3.50.0+): chdir-to-parent before remove when cwd IS target folder; refuses versioned-folder fallback.
 Completion generator uses marker-comment opt-in (v3.0.0+): `// gitmap:cmd top-level` on const block, `// gitmap:cmd skip` per spec. CI `generate-check` enforces drift.
 VS Code Project Manager sync: resolve user-data root per OS first, then append `User/globalStorage/alefragnani.project-manager/projects.json` — never hardcode the full path.
-Current version: v5.7.0 (Windows release ZIPs/installers ship `gitmap.ps1` beside exe so `gitmap cd` can work before profile reload).
+Current version: v5.9.0 (Windows installers write/load PowerShell wrapper across standard profiles; release shim supports handoff).
 Release install-snippet gate: `uploadToGitHub` MUST guard `AppendPinnedInstallSnippet` with `ShouldPrintInstallHint(getRemoteURL())` so non-gitmap repos don't get the pinned PowerShell/bash gitmap installer block + `## gitmap vX.Y.Z` header in their release bodies. See mem://features/release-install-snippet-gating.
 Command wrapper detection: never use PATH snippet marker or `GITMAP_WRAPPER` as proof `gitmap` shell function is active. Use `# gitmap command wrapper v1` + `GITMAP_COMMAND_WRAPPER`; Windows installers and release ZIPs must ship/load PowerShell wrapper AND `gitmap.ps1` shim, not just PATH/exe. See mem://features/command-wrapper-marker-separation.
 Consumer-facing JSON outputs use `gitmap/stablejson` (key-by-key, no struct reflection) so field order cannot drift across Go versions or encoding/json/v2.

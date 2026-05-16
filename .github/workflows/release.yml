@@ -166,8 +166,22 @@ jobs:
             if ($dest -and (Test-Path -LiteralPath $dest)) { Set-Location -LiteralPath $dest }
             return
           }
-          & $real @args
-          $global:LASTEXITCODE = $LASTEXITCODE
+          $handoff = [IO.Path]::Combine([IO.Path]::GetTempPath(), "gitmap-handoff-$([Guid]::NewGuid().ToString('N')).txt")
+          try {
+            $env:GITMAP_HANDOFF_FILE = $handoff; $env:GITMAP_WRAPPER = "1"; $env:GITMAP_COMMAND_WRAPPER = "1"
+            & $real @args
+            $exitCode = $LASTEXITCODE
+            if ((Test-Path -LiteralPath $handoff) -and ((Get-Item -LiteralPath $handoff).Length -gt 0)) {
+              $target = (Get-Content -LiteralPath $handoff -Raw).Trim()
+              if ($target -and (Test-Path -LiteralPath $target)) { Set-Location -LiteralPath $target }
+            }
+            $global:LASTEXITCODE = $exitCode
+            return
+          }
+          finally {
+            Remove-Item -LiteralPath $handoff -ErrorAction SilentlyContinue
+            Remove-Item Env:\GITMAP_HANDOFF_FILE -ErrorAction SilentlyContinue
+          }
           PWSHIM
             zip "${f%.exe}.zip" -j "$tmp/gitmap.exe" "$tmp/gitmap.ps1"
             rm -rf "$tmp" "$f"
@@ -338,6 +352,43 @@ jobs:
               }
           }
 
+          function Get-GitmapCommandWrapperBlock([string]$dir) {
+              $safeDir = $dir.Replace("'", "''")
+              $template = @'
+          # gitmap command wrapper v1
+          function global:Get-GitmapCommand { $candidate = Join-Path -Path '__GITMAP_DIR__' -ChildPath 'gitmap.exe'; if (Test-Path -LiteralPath $candidate) { return $candidate }; return (Get-Command gitmap.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1).Source }
+          function global:Invoke-GitmapAndSetLocation { param([string[]]$GitMapArgs); $real = Get-GitmapCommand; if (-not $real) { Write-Error "gitmap executable not found"; return }; if ($GitMapArgs.Count -gt 0 -and ($GitMapArgs[0] -eq 'cd' -or $GitMapArgs[0] -eq 'go')) { $env:GITMAP_WRAPPER = "1"; $env:GITMAP_COMMAND_WRAPPER = "1"; $dest = & $real @GitMapArgs; if ($LASTEXITCODE -ne 0) { return }; if ($dest -and (Test-Path -LiteralPath $dest)) { Set-Location -LiteralPath $dest }; return }; $handoff = [IO.Path]::Combine([IO.Path]::GetTempPath(), "gitmap-handoff-$([Guid]::NewGuid().ToString('N')).txt"); try { $env:GITMAP_HANDOFF_FILE = $handoff; $env:GITMAP_WRAPPER = "1"; $env:GITMAP_COMMAND_WRAPPER = "1"; & $real @GitMapArgs; if ((Test-Path -LiteralPath $handoff) -and ((Get-Item -LiteralPath $handoff).Length -gt 0)) { $target = (Get-Content -LiteralPath $handoff -Raw).Trim(); if ($target -and (Test-Path -LiteralPath $target)) { Set-Location -LiteralPath $target } } } finally { Remove-Item -LiteralPath $handoff -ErrorAction SilentlyContinue; Remove-Item Env:\GITMAP_HANDOFF_FILE -ErrorAction SilentlyContinue } }
+          function global:gcd { Invoke-GitmapAndSetLocation -GitMapArgs (@('cd') + $args) }
+          function global:gitmap { Invoke-GitmapAndSetLocation $args }
+          # gitmap command wrapper v1 end
+          '@
+              return $template.Replace('__GITMAP_DIR__', $safeDir)
+          }
+
+          function Add-CommandWrapperToProfile([string]$profilePath, [string]$dir) {
+              if (-not $profilePath) { return }
+              $profileDir = Split-Path $profilePath -Parent
+              if ($profileDir -and -not (Test-Path $profileDir)) { New-Item -ItemType Directory -Path $profileDir -Force | Out-Null }
+              $block = Get-GitmapCommandWrapperBlock $dir
+              if (-not (Test-Path $profilePath)) { Add-Content -Path $profilePath -Value $block -Encoding UTF8; return }
+              $content = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
+              $pattern = "(?s)" + [regex]::Escape("# gitmap command wrapper v1") + ".*?" + [regex]::Escape("# gitmap command wrapper v1 end")
+              if ($content -match $pattern) { Set-Content -Path $profilePath -Value ([regex]::Replace($content, $pattern, $block, 1)) -Encoding UTF8; return }
+              Add-Content -Path $profilePath -Value $block -Encoding UTF8
+          }
+
+          function Resolve-PowerShellProfileTargets {
+              $targets = @()
+              if ($PROFILE) { $targets += $PROFILE }
+              if ($env:USERPROFILE) {
+                  $targets += (Join-Path $env:USERPROFILE "Documents\PowerShell\profile.ps1")
+                  $targets += (Join-Path $env:USERPROFILE "Documents\PowerShell\Microsoft.PowerShell_profile.ps1")
+                  $targets += (Join-Path $env:USERPROFILE "Documents\WindowsPowerShell\profile.ps1")
+                  $targets += (Join-Path $env:USERPROFILE "Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1")
+              }
+              return @($targets | Where-Object { $_ } | Select-Object -Unique)
+          }
+
           # --- Main ---
 
           Write-Host ""
@@ -353,6 +404,8 @@ jobs:
           finally { Remove-Item $result.TmpDir -Recurse -Force -ErrorAction SilentlyContinue }
 
           if (-not $NoPath) { Add-ToPath $resolvedDir }
+          foreach ($profileTarget in (Resolve-PowerShellProfileTargets)) { Add-CommandWrapperToProfile $profileTarget $resolvedDir }
+          Invoke-Expression (Get-GitmapCommandWrapperBlock $resolvedDir)
 
           # Download and extract docs-site
           Write-Step "Downloading docs-site..."
