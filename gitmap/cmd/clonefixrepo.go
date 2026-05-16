@@ -25,6 +25,7 @@ import (
 
 	"github.com/alimtvnetwork/gitmap-v19/gitmap/clonenext"
 	"github.com/alimtvnetwork/gitmap-v19/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v19/gitmap/gitutil"
 )
 
 // runCloneFixRepo implements `gitmap clone-fix-repo` (alias cfr).
@@ -64,13 +65,14 @@ func runCloneFixRepoPipeline(args []string, makePublic bool) {
 	fmt.Printf(constants.MsgCloneFixRepoDone, absPath)
 }
 
-// maybeRunFixRepoStep runs `fix-repo --all` only when the repo folder
-// name carries a `-vN` suffix. Repos without a version suffix have
-// nothing the rewriter can target, so we skip with a one-line notice.
+// maybeRunFixRepoStep runs `fix-repo --all` only when the cloned repo
+// identity carries a `-vN` suffix. The identity comes from Git remote
+// metadata first, not the flattened local folder name.
 // `--require-version` restores the strict (exit-4) failure mode for
 // CI pipelines that want the old contract.
 func maybeRunFixRepoStep(absPath string, requireVersion bool) {
-	parsed := clonenext.ParseRepoName(filepath.Base(absPath))
+	repoName := resolveCloneFixRepoName(absPath)
+	parsed := clonenext.ParseRepoName(repoName)
 	if parsed.HasVersion {
 		runChainedGitmapStep([]string{constants.CmdFixRepo, "--" + constants.FixRepoFlagAll})
 
@@ -81,6 +83,22 @@ func maybeRunFixRepoStep(absPath string, requireVersion bool) {
 		os.Exit(constants.ExitCloneFixRepoChainFailed)
 	}
 	fmt.Printf(constants.MsgCloneFixRepoSkipNoVer, parsed.BaseName)
+}
+
+func resolveCloneFixRepoName(absPath string) string {
+	remoteURL, err := gitutil.RemoteURL(absPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, constants.WarnCloneFixRepoRemoteFmt, absPath, err)
+
+		return filepath.Base(absPath)
+	}
+	_, _, repo, ok := parseRemoteURL(remoteURL)
+	if ok {
+		return repo
+	}
+	fmt.Fprintf(os.Stderr, constants.WarnCloneFixRepoRemoteFmt, remoteURL, constants.ErrCloneFixRepoRemoteParse)
+
+	return filepath.Base(absPath)
 }
 
 // parseCloneFixRepoArgs returns (url, folderName, noVSCodeSync, requireVersion).
