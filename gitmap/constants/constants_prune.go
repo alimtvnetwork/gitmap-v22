@@ -3,9 +3,8 @@ package constants
 // gitmap:cmd top-level
 // Prune command names.
 const (
-	CmdPrune       = "prune"
-	CmdPruneAlias  = "prn"  // primary short alias (was "pr" before v5.6.0)
-	CmdPruneAlias2 = "pr"   // legacy alias retained briefly; pull-release now owns "pr" in help text
+	CmdPrune      = "prune"
+	CmdPruneAlias = "prn" // short alias (was "pr" before v5.6.0; "pr" now belongs to pull-release)
 )
 
 // Prune flag names.
