@@ -2282,7 +2282,7 @@ gitmap tr 10 v1.$$ -s 5
 | `release-pending` | `rp` | Show unreleased commits since last tag |
 | `revert` | — | Revert to a specific release version |
 | `clear-release-json` | `crj` | Remove orphaned release metadata files |
-| `prune` | `pr` | Delete stale release branches |
+| `prune` | `prn` | Delete stale release branches (alias was `pr` before v5.6.0; `pr` now belongs to `pull-release`) |
 
 ```bash
 gitmap changelog v2.49.0
