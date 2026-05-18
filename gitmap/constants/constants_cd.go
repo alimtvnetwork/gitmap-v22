@@ -183,7 +183,7 @@ const CDFuncPowerShell = `function gcd {
   }
   $env:GITMAP_WRAPPER = "1"
   $env:GITMAP_COMMAND_WRAPPER = "1"
-  $dest = & $real cd @args
+  $dest = (& $real cd @args | Out-String).Trim()
   if ($LASTEXITCODE -ne 0) {
     return
   }
