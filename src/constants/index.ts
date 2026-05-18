@@ -45,4 +45,4 @@ export const ROOT_RELATIVE_LABEL = "(root)";
  *
  * Format: `v` + the Go literal (Go uses bare semver, web uses `v` prefix).
  */
-export const VERSION = "v5.21.0";
+export const VERSION = "v5.22.0";
