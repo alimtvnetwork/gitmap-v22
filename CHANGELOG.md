@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.17.0 — (2026-05-18) — `gitmap cd` PowerShell wrapper: coerce stdout to a single string
+
+### Fixed
+- **`gitmap cd <repo>` crashed in PowerShell** with `Set-Location : Cannot convert 'System.Object[]' to the type 'System.String'` when the captured stdout was parsed as a multi-element array (any extra line, CRLF artifact, or auxiliary write from the binary turned `$dest` into `System.Object[]`, which `Set-Location -LiteralPath` rejects).
+- All four PowerShell wrapper templates now collapse the captured output with `(& $real … | Out-String).Trim()` so `$dest` is always a single trimmed string before being passed to `Test-Path` / `Set-Location`:
+  - `gitmap/constants/constants_cd.go` — `CDFuncPowerShell` (`gcd` + `gitmap` profile functions)
+  - `gitmap/constants/constants_pathsnippet.go` — `PathSnippetPwshFmt` (`Invoke-GitmapAndSetLocation`)
+  - `gitmap/constants/constants_cd_shim.go` — `PowerShellShimTemplateFmt` (`gitmap.ps1` shim)
+  - `gitmap/scripts/install.ps1` — `Get-GitmapCommandWrapperBlock` + `Get-GitmapPowerShellShimContent`
+- Users hit by the v5.16.0-and-earlier wrapper need to re-run `gitmap setup` (or re-install) after upgrading so their `Microsoft.PowerShell_profile.ps1` snippet is rewritten with the fixed body.
+
 ## v5.16.0 — (2026-05-18) — `gitmap release` no longer leaks gitmap-specific content into other repos' releases
 
 ### Fixed
