@@ -45,8 +45,9 @@ const (
 	ToolLiteDB        = "litedb"
 	ToolVSCodeCtx     = "vscode-ctx"
 	ToolPwshCtx       = "pwsh-ctx"
-	ToolOBS           = "obs"
-	ToolAllDevTools   = "all"
+	ToolOBS             = "obs"
+	ToolAllDevTools     = "all"
+	ToolGitmapOneliner  = "gitmap-oneliner"
 )
 
 // Supported tool names — Databases.
