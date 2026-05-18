@@ -17,8 +17,18 @@ func runSSH(args []string) {
 
 // dispatchSSH routes SSH subcommands to their handlers.
 func dispatchSSH(sub string, args []string) {
-	if sub == constants.SubCmdSSHCat {
+	if sub == constants.SubCmdSSHCat || sub == constants.SubCmdSSHView || sub == constants.SubCmdSSHViewS {
 		runSSHCat(args)
+
+		return
+	}
+	if sub == constants.SubCmdSSHCopy || sub == constants.SubCmdSSHCopyS {
+		runSSHCopy(args)
+
+		return
+	}
+	if sub == constants.SubCmdSSHCreate {
+		runSSHGenerate(args)
 
 		return
 	}

@@ -72,10 +72,24 @@ Manages SSH key pairs for Git authentication.
         Path:        ~/.ssh/id_rsa_work
         Fingerprint: SHA256:def456...
 
-### Display the public key
+### Display the public key (`view` / `v` / `cat`)
 
-    $ gitmap ssh cat --name work
+    $ gitmap ssh view --name work
     ssh-rsa AAAA... user@example.com
+
+### Copy the public key to the clipboard (`copy` / `cp`)
+
+    $ gitmap ssh copy --name work
+    ssh-rsa AAAA... user@example.com
+      ✓ Public key copied to clipboard (412 bytes)
+
+Uses `clip` on Windows, `pbcopy` on macOS, and `wl-copy` / `xclip` / `xsel`
+on Linux (first one found). If none are available, the key is still
+printed and a one-line warning is emitted — never fails.
+
+### Create a key (`create` is an explicit alias for the default)
+
+    $ gitmap ssh create --name work --path ~/.ssh/id_rsa_work
 
 ### Clone using a specific SSH key
 

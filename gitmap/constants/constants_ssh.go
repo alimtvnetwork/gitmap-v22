@@ -5,12 +5,25 @@ package constants
 const (
 	CmdSSH           = "ssh"
 	SubCmdSSHCat     = "cat"
+	SubCmdSSHView    = "view" // alias of cat — print public key
+	SubCmdSSHViewS   = "v"
+	SubCmdSSHCopy    = "copy" // print public key + push to OS clipboard
+	SubCmdSSHCopyS   = "cp"
+	SubCmdSSHCreate  = "create" // explicit alias for default `gitmap ssh` (generate)
 	SubCmdSSHList    = "list"
 	SubCmdSSHListS   = "ls"
 	SubCmdSSHDelete  = "delete"
 	SubCmdSSHDeleteS = "rm"
 	SubCmdSSHConfig  = "config"
 )
+
+// SSH copy messages.
+const (
+	MsgSSHCopied       = "  \u2713 Public key copied to clipboard (%d bytes)\n"
+	MsgSSHCopyFallback = "  \u26a0  Clipboard tool not available — key printed above; copy it manually\n"
+	ErrSSHClipboard    = "Error: clipboard write failed via %s: %v\n"
+)
+
 
 // SshKey table (v15: singular + SshKeyId PK; abbreviation per v15: Ssh, not SSH).
 const TableSshKey = "SshKey"

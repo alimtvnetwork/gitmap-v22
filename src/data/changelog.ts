@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v5.21.0",
+    date: "2026-05-18",
+    subtitle: "`gitmap ssh` gets `view` / `copy` / `create` subcommands (clipboard-aware)",
+    items: [
+      "Added: `gitmap ssh view <key>` (aliases `v`, existing `cat`) prints the public key to stdout. Same output as `ssh cat` — just a more discoverable verb alongside `create` / `copy` / `list` / `delete`.",
+      "Added: `gitmap ssh copy <key>` (alias `cp`) prints the public key AND pushes it to the OS clipboard in one shot. Picks the right tool per OS: `clip` on Windows, `pbcopy` on macOS, `wl-copy` → `xclip -selection clipboard` → `xsel --clipboard --input` on Linux (first one found). If no clipboard tool is available, the key is still printed and a one-line warning is emitted to stderr — the command never fails.",
+      "Added: `gitmap ssh create <flags>` is an explicit alias for the default `gitmap ssh` (generate). All existing `--name` / `--path` / `--email` / `--force` flags work unchanged.",
+      "Files: `gitmap/constants/constants_ssh.go` (new subcommand consts + clipboard messages); `gitmap/cmd/ssh.go` (dispatch); `gitmap/cmd/sshcopy.go` (new — `runSSHCopy`, `writeClipboard`, `resolveClipboardTool`); `gitmap/helptext/ssh.md`.",
+    ],
+  },
+  {
     version: "v5.20.0",
     date: "2026-05-18",
     subtitle: "`gitmap clone --ssh` / `--https` coerce every URL into the requested transport before git runs",

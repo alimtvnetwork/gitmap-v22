@@ -1,5 +1,19 @@
 # Changelog
 
+## v5.21.0 — (2026-05-18) — `gitmap ssh` gets `view` / `copy` / `create` subcommands
+
+### Added
+- **`gitmap ssh view <key>`** (aliases: `v`, existing `cat`) — prints the public key to stdout. Identical output to `ssh cat`; just a more discoverable verb.
+- **`gitmap ssh copy <key>`** (alias: `cp`) — prints the public key AND pushes it to the OS clipboard in one shot. Picks the right tool per OS: `clip` on Windows, `pbcopy` on macOS, `wl-copy` → `xclip -selection clipboard` → `xsel --clipboard --input` on Linux (first one found). If no clipboard tool is available, the key is still printed and a one-line warning is emitted to stderr — the command never fails.
+- **`gitmap ssh create <flags>`** — explicit alias for the default `gitmap ssh` (generate). Improves discoverability alongside `view` / `copy` / `delete`.
+
+### Files
+- `gitmap/constants/constants_ssh.go` — new subcommand consts (`SubCmdSSHView`/`V`, `SubCmdSSHCopy`/`Cp`, `SubCmdSSHCreate`) + clipboard messages (`MsgSSHCopied`, `MsgSSHCopyFallback`, `ErrSSHClipboard`).
+- `gitmap/cmd/ssh.go` — dispatch wires the three new verbs.
+- `gitmap/cmd/sshcopy.go` — new: `runSSHCopy` + `writeClipboard` + `resolveClipboardTool` (cross-platform binary picker).
+- `gitmap/helptext/ssh.md` — documents view/copy/create with examples.
+
+
 ## v5.20.0 — (2026-05-18) — `gitmap clone --ssh` / `--https` coerce every URL into the requested transport
 
 ### Added
