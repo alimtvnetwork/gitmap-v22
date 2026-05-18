@@ -1,5 +1,15 @@
 # Changelog
 
+## v5.24.0 — (2026-05-18) — `gitmap clone --ssh` actually parses when placed after the URL
+
+### Fixed
+- `gitmap clone <url> --ssh` (and `--https`, `--no-replace`, every other bool flag) was silently ignored when written AFTER the positional URL. Go's `flag` package stops parsing at the first non-flag argument, so the trailing `--ssh` never reached `applyURLSchemeFlags` and the HTTPS URL was cloned as-is.
+- `parseCloneFlags` now routes through `reorderFlagsBeforeArgs` (the same helper used by `release`, `clone-next`, `clone-from`, `commit-transfer`, etc.), so flags are honoured regardless of position: `gitmap clone --ssh <url>`, `gitmap clone <url> --ssh`, and `gitmap clone <url> --ssh --no-replace` all behave identically.
+- SSH-shorthand and `ssh://` URLs already work natively through `git clone` — no extra wiring required; the converter only fires when `--ssh` is supplied to coerce an HTTPS URL into shorthand before `git` runs.
+
+### Pinned
+- README pinned-version block + version matrix moved to **v5.24.0**.
+
 ## v5.23.0 — (2026-05-18) — Root-level installer URLs (`/install.ps1`, `/install.sh`)
 
 ### Added

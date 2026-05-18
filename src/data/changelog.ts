@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v5.24.0",
+    date: "2026-05-18",
+    subtitle: "`gitmap clone --ssh` now works when the flag follows the URL",
+    items: [
+      "Fixed: `gitmap clone <url> --ssh` (and `--https`, `--no-replace`, every other bool flag) was silently ignored when written AFTER the positional URL. Go's `flag` package stops parsing at the first non-flag, so the trailing `--ssh` never reached `applyURLSchemeFlags` and the HTTPS URL was cloned as-is.",
+      "Fixed: `parseCloneFlags` now routes through `reorderFlagsBeforeArgs` (the same helper used by `release`, `clone-next`, `clone-from`, `commit-transfer`, etc.), so flags are honoured regardless of position. `gitmap clone --ssh <url>`, `gitmap clone <url> --ssh`, and `gitmap clone <url> --ssh --no-replace` all behave identically.",
+      "Clarified: SSH-shorthand and `ssh://` URLs already work natively through `git clone` — no extra wiring required. The `--ssh` converter only fires when explicitly supplied, to coerce an HTTPS URL into shorthand before `git` runs.",
+      "Pinned: README pinned-version block + version matrix moved to **v5.24.0**.",
+      "Synced: `gitmap/constants/constants.go` (`Version = \"5.24.0\"`) and `src/constants/index.ts` (`VERSION = \"v5.24.0\"`).",
+    ],
+  },
+  {
     version: "v5.23.0",
     date: "2026-05-18",
     subtitle: "Root-level installer URLs — `/install.ps1` and `/install.sh`",
