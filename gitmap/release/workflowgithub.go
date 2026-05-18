@@ -37,8 +37,13 @@ func uploadToGitHub(v Version, assets []string, opts Options) {
 		name = opts.Notes
 	}
 
-	body := DetectChangelog()
+	// Release body: only the gitmap source repo gets the auto-detected
+	// CHANGELOG.md notes + pinned install snippet. For any other repo,
+	// the body stays empty — the user wanted "just create the tag,
+	// don't dump gitmap's changelog into their release notes".
+	var body string
 	if ShouldPrintInstallHint(getRemoteURL()) {
+		body = DetectChangelog()
 		body = AppendPinnedInstallSnippet(body, v.String())
 	}
 	ghRelease, err := CreateGitHubRelease(owner, repo, v.String(), name, body, token, opts.IsDraft)

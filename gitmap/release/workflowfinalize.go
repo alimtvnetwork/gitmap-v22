@@ -44,13 +44,21 @@ func pushAndFinalize(v Version, branchName, tag, _ string, opts Options) error {
 
 	// Bundle docs-site for help-dashboard command, and bake per-version
 	// snapshots of the release-version installer scripts (spec 105).
+	// The release-version.{sh,ps1} snapshots hard-code REPO=alimtvnetwork/
+	// gitmap-v20 + BINARY_NAME=gitmap, so they're only valid for the
+	// gitmap source repo. For any other repo, attaching them would mislead
+	// users into downloading gitmap binaries when they wanted the host
+	// project. Gate by the same ShouldPrintInstallHint check used for the
+	// release-body install snippet (spec/02-app-issues/27).
 	if stagingDir, stagingErr := EnsureStagingDir(); stagingErr == nil {
 		if docsSiteAsset := buildDocsSiteAsset(stagingDir); len(docsSiteAsset) > 0 {
 			assets = append(assets, docsSiteAsset)
 		}
 
-		snapshotAssets := buildReleaseVersionSnapshots(v.String(), stagingDir)
-		assets = append(assets, snapshotAssets...)
+		if ShouldPrintInstallHint(getRemoteURL()) {
+			snapshotAssets := buildReleaseVersionSnapshots(v.String(), stagingDir)
+			assets = append(assets, snapshotAssets...)
+		}
 	}
 
 	if opts.Compress && len(assets) > 0 {
