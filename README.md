@@ -50,31 +50,31 @@ irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v20/main/install.ps1 
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v20/main/install.sh | sh
 ```
 
-### 📌 Pinned version (`v5.38.0`)
+### 📌 Pinned version (`v5.39.0`)
 
 ```powershell
 # Windows · PowerShell
-irm https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/release-version-v5.38.0.ps1 | iex
+irm https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/release-version-v5.39.0.ps1 | iex
 ```
 
 ```bash
 # macOS · Linux · Bash
-curl -fsSL https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/release-version-v5.38.0.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/release-version-v5.39.0.sh | bash
 ```
 
-#### 🧭 Version matrix — `v5.38.0` install-script URLs
+#### 🧭 Version matrix — `v5.39.0` install-script URLs
 
-One-line installers and release assets for the pinned **v5.38.0** build across every supported platform. All URLs resolve to the exact release tag — no fallback, no discovery.
+One-line installers and release assets for the pinned **v5.39.0** build across every supported platform. All URLs resolve to the exact release tag — no fallback, no discovery.
 
 | Platform | Shell | Install-script URL | Release binary asset |
 | --- | --- | --- | --- |
-| **Windows** (amd64) | PowerShell | [`release-version-v5.38.0.ps1`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/release-version-v5.38.0.ps1) | [`gitmap-v20.45.0-windows-amd64.zip`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/gitmap-v20.45.0-windows-amd64.zip) |
-| **macOS** (arm64) | Bash | [`release-version-v5.38.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/release-version-v5.38.0.sh) | [`gitmap-v20.45.0-darwin-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/gitmap-v20.45.0-darwin-arm64.tar.gz) |
-| **macOS** (amd64) | Bash | [`release-version-v5.38.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/release-version-v5.38.0.sh) | [`gitmap-v20.45.0-darwin-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/gitmap-v20.45.0-darwin-amd64.tar.gz) |
-| **Linux** (amd64) | Bash | [`release-version-v5.38.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/release-version-v5.38.0.sh) | [`gitmap-v20.45.0-linux-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/gitmap-v20.45.0-linux-amd64.tar.gz) |
-| **Linux** (arm64) | Bash | [`release-version-v5.38.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/release-version-v5.38.0.sh) | [`gitmap-v20.45.0-linux-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.38.0/gitmap-v20.45.0-linux-arm64.tar.gz) |
+| **Windows** (amd64) | PowerShell | [`release-version-v5.39.0.ps1`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/release-version-v5.39.0.ps1) | [`gitmap-v20.45.0-windows-amd64.zip`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/gitmap-v20.45.0-windows-amd64.zip) |
+| **macOS** (arm64) | Bash | [`release-version-v5.39.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/release-version-v5.39.0.sh) | [`gitmap-v20.45.0-darwin-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/gitmap-v20.45.0-darwin-arm64.tar.gz) |
+| **macOS** (amd64) | Bash | [`release-version-v5.39.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/release-version-v5.39.0.sh) | [`gitmap-v20.45.0-darwin-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/gitmap-v20.45.0-darwin-amd64.tar.gz) |
+| **Linux** (amd64) | Bash | [`release-version-v5.39.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/release-version-v5.39.0.sh) | [`gitmap-v20.45.0-linux-amd64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/gitmap-v20.45.0-linux-amd64.tar.gz) |
+| **Linux** (arm64) | Bash | [`release-version-v5.39.0.sh`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/release-version-v5.39.0.sh) | [`gitmap-v20.45.0-linux-arm64.tar.gz`](https://github.com/alimtvnetwork/gitmap-v20/releases/download/v5.39.0/gitmap-v20.45.0-linux-arm64.tar.gz) |
 
-> **Release page:** [github.com/alimtvnetwork/gitmap-v20/releases/tag/v5.38.0](https://github.com/alimtvnetwork/gitmap-v20/releases/tag/v5.38.0) · **Asset naming contract:** `gitmap-<version>-<os>-<arch>.<ext>` (`.zip` on Windows, `.tar.gz` elsewhere) — verified by the installer pre-flight HEAD probe.
+> **Release page:** [github.com/alimtvnetwork/gitmap-v20/releases/tag/v5.39.0](https://github.com/alimtvnetwork/gitmap-v20/releases/tag/v5.39.0) · **Asset naming contract:** `gitmap-<version>-<os>-<arch>.<ext>` (`.zip` on Windows, `.tar.gz` elsewhere) — verified by the installer pre-flight HEAD probe.
 
 ### 🎯 Install — Quick (pick your install drive)
 
@@ -104,7 +104,7 @@ Pass an explicit install path on the one-liner — no prompts, no auto-detection
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v20/main/install.sh | sh -s -- --dir /opt/gitmap
 ```
 
-> Add `-Version v5.38.0` (PowerShell) or `--version v5.38.0` (Bash) before the closing quote / end of line to pin a specific release into your custom directory.
+> Add `-Version v5.39.0` (PowerShell) or `--version v5.39.0` (Bash) before the closing quote / end of line to pin a specific release into your custom directory.
 
 ---
 
@@ -1275,7 +1275,7 @@ gitmap pull --https                             # rewrite origin to HTTPS, pull,
 gitmap push --ssh origin main                   # extra args forward verbatim
 
 # pull-release-cd (prc) — release N repos in one shot
-gitmap prc gitmap v5.38.0, marco v2.5.0, https://github.com/me/other v3.1.0
+gitmap prc gitmap v5.39.0, marco v2.5.0, https://github.com/me/other v3.1.0
 
 # ssh — inspect / copy / create the public key (auto-copies to clipboard)
 gitmap ssh view                                 # print + copy ~/.ssh/id_*.pub
