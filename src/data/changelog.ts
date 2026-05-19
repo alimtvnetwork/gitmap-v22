@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v5.27.0",
+    date: "2026-05-19",
+    subtitle: "`gitmap cfrp` / `cfr` now honour `--ssh` / `--https`",
+    items: [
+      "Fixed: `gitmap cfrp <url> --ssh` (and `cfr`) was ignoring the transport flag — `parseCloneFixRepoArgs` only recognised `--no-vscode-sync` and `--require-version`, so the HTTPS URL was passed straight to the in-process clone.",
+      "Fixed: URL is now rewritten via `ConvertURLToSSH` / `ConvertURLToHTTPS` before the clone runs, mirroring `gitmap clone --ssh` exactly.",
+      "Added: accepts `--ssh`, `-ssh`, `--sh`, `-sh`, `--https`, `-https`, `--ht`, `-ht` (single- and double-dash, plus the same short aliases as `gitmap clone`). When both `--ssh` and `--https` are set, `--ssh` wins with a stderr warning.",
+      "Added: prints a `↪ --ssh rewrite: <before> → <after>` breadcrumb so the substitution is visible before `git clone` runs.",
+      "Pinned: README pinned-version block + version matrix moved to **v5.27.0**.",
+      "Synced: `gitmap/constants/constants.go` (`Version = \"5.27.0\"`) and `src/constants/index.ts` (`VERSION = \"v5.27.0\"`).",
+    ],
+  },
+  {
     version: "v5.26.0",
     date: "2026-05-18",
     subtitle: "Pin bump — rolls up the `clone --ssh` flag-position fix as the stable build",
