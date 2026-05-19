@@ -1,5 +1,21 @@
 # Changelog
 
+## v5.40.0 — (2026-05-19) — `fix-repo` auto-backup + `gitmap undo` restore
+
+- **Auto-backup.** Every `gitmap fix-repo` write (non-dry-run) now snapshots the pre-rewrite copy of each modified file to `<repoRoot>/.gitmap/backup/<repo>/v<current>/fix-repo/<UTC-timestamp>/files/<rel/path>` alongside a `manifest.json` index. Untouched files are never copied; dry-run never creates a snapshot directory. One snapshot per invocation, lexically-sortable UTC stamp == chronological order.
+- **New command: `gitmap undo` (alias `ud`).** Restores the latest snapshot for the **current repo + current version** back onto the working tree. Subcommands: `--list` (snapshots newest-first with file counts, latest marked `*`), `--snapshot <ts>` (pick a specific stamp), `--dry-run` (preview without writing). Snapshots are scoped to `<repo>/v<current>` so an undo inside `gitmap-v4` can never touch a `gitmap-v3` snapshot.
+- **Layout** (under repo root):
+  ```
+  .gitmap/backup/<repo>/v<current>/fix-repo/<UTC-ts>/
+    manifest.json            schemaVersion, repo, currentVersion, timestamp, gitmapVersion, files[]
+    files/<rel/path>         verbatim pre-rewrite bytes
+  ```
+- **Code:** new `gitmap/cmd/fixrepo_backup.go` (`fixRepoBackupSession`, lazy mkdir on first backup, idempotent per rel — first observation wins); new `gitmap/cmd/undo.go` (parse → list → restore). `rewriteOneFile` was split into a pure-compute step + new `persistRewrittenFile` so backup runs strictly BEFORE the disk write. New constants in `gitmap/constants/constants_undo.go`. New `CmdUndo` / `CmdUndoAlias` in `constants_cli.go`, wired in `roottooling.go`, registered in `cmd_constants_test.go`. Help text: `gitmap/helptext/undo.md`.
+- **Exit codes (`undo`):** `0` ok / `6` bad-flag / `7` write-failed / `8` bad-config (manifest missing/malformed).
+- **Spec updated:** `spec/04-generic-cli/27-fix-repo-command.md` adds a **Backup & undo (v5.40.0+)** section documenting the layout, scoping rule, and snapshot lifecycle.
+- Pinned: README pinned-version block + version matrix moved to **v5.40.0**. Synced `gitmap/constants/constants.go` (`Version = "5.40.0"`) and `src/constants/index.ts` (`VERSION = "v5.40.0"`).
+
+
 ## v5.39.0 — (2026-05-19) — `fix-repo --restrict no-version` (alias `-r nv`): skip the v1→v2 bare-base sweep on demand
 
 - **New flag.** `gitmap fix-repo --restrict no-version` (short form `gitmap fr -2 -r nv`) suppresses the v1→v2 bare-base rewrite so ONLY `{base}-vN` tokens are touched. Bare `{base}` occurrences are left alone even during a v1→v2 bump.
