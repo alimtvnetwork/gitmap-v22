@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.35.0 — (2026-05-19) — Root README: full command surface for `push`, `pull`, `prc`, `ssh`, `cfr`/`cfrp`, `install gitmap-oneliner`
+
+- README "Cloning & Sync" table now lists every command added since v5.27 (`cfr`, `cfrp`, `push`, `pull`, `pull-release-cd`, `ssh view/copy/create`, `install gitmap-oneliner`) with aliases, descriptions, and copy-pasteable examples.
+- Transport-coercion flags (`--ssh`/`--sh`, `--https`/`--ht`) documented inline on every relevant command.
+- Pinned version bumped to **v5.35.0** in `constants.go`, `src/constants/index.ts`, and the README version matrix.
+
 ## v5.34.0 — (2026-05-19) — `cfr` / `cfrp` help refresh + full clone-flag parity surfaced
 
 ### Added

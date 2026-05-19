@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v5.35.0",
+    date: "2026-05-19",
+    subtitle: "Root README: full command surface for `push`, `pull`, `prc`, `ssh`, `cfr`/`cfrp`, `install gitmap-oneliner`",
+    items: [
+      "Docs: README \"Cloning & Sync\" table now lists every command added since v5.27 — `clone-fix-repo` (`cfr`), `clone-fix-repo-pub` (`cfrp`), `push` (`ph`), `pull`, `pull-release-cd` (`prc`), `ssh view/copy/create`, and `install gitmap-oneliner` — with aliases, descriptions, and copy-pasteable examples.",
+      "Docs: transport-coercion flags (`--ssh`/`--sh`, `--https`/`--ht`) called out inline on `clone`, `cfr`/`cfrp`, `push`, and `pull` so the SSH/HTTPS rewrite is discoverable from the README alone.",
+      "Pinned: README pinned-version block + version matrix moved to **v5.35.0**.",
+      "Synced: `gitmap/constants/constants.go` (`Version = \"5.35.0\"`) and `src/constants/index.ts` (`VERSION = \"v5.35.0\"`).",
+    ],
+  },
+  {
     version: "v5.31.0",
     date: "2026-05-19",
     subtitle: "`gitmap pull-release-cd` / `prc` — multi-repo one-shot release",
