@@ -76,6 +76,13 @@ const (
 	FixRepoMsgChangedFmt   = "changed: %d files (%d replacements)\n"
 	FixRepoMsgModeFmt      = "mode:    %s\n"
 	FixRepoMsgModified     = "modified: %s (%d replacements)\n"
+	// Dry-run preview output (v5.40.0+). One line per file that would
+	// be modified, followed by a compact per-rule breakdown so users
+	// see exactly which `{base}-vN` targets would fire. The breakdown
+	// renders via FixRepoMsgDryRunHit / FixRepoMsgDryRunHitBare.
+	FixRepoMsgDryRunPreview = "  [dry-run] would rewrite %s (%d replacements): %s\n"
+	FixRepoMsgDryRunHit     = "v%d×%d"
+	FixRepoMsgDryRunHitBare = "bare×%d"
 	FixRepoMsgNothing      = "fix-repo: nothing to replace\n"
 	FixRepoTargetsNone     = "(none)"
 	FixRepoModeWrite       = "write"
