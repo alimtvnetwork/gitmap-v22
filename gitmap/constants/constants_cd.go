@@ -187,12 +187,13 @@ const CDFuncPowerShell = `function gcd {
   }
   $env:GITMAP_WRAPPER = "1"
   $env:GITMAP_COMMAND_WRAPPER = "1"
-  $dest = (& $real cd @args | Out-String).Trim()
+  $dest = [string](& $real cd @args | Out-String)
   if ($LASTEXITCODE -ne 0) {
     return
   }
-  if ($dest -and (Test-Path -LiteralPath $dest)) {
-    Set-Location -LiteralPath $dest
+  $dest = $dest.Trim()
+  if ($dest -and (Test-Path -LiteralPath ([string]$dest))) {
+    Set-Location -LiteralPath ([string]$dest)
   }
 }
 
@@ -217,12 +218,13 @@ function gitmap {
   if ($args.Count -gt 0 -and ($args[0] -eq 'cd' -or $args[0] -eq 'go')) {
     $env:GITMAP_WRAPPER = "1"
     $env:GITMAP_COMMAND_WRAPPER = "1"
-    $dest = (& $real @args | Out-String).Trim()
+    $dest = [string](& $real @args | Out-String)
     if ($LASTEXITCODE -ne 0) {
       return
     }
-    if ($dest -and (Test-Path -LiteralPath $dest)) {
-      Set-Location -LiteralPath $dest
+    $dest = $dest.Trim()
+    if ($dest -and (Test-Path -LiteralPath ([string]$dest))) {
+      Set-Location -LiteralPath ([string]$dest)
     }
     return
   }
@@ -233,9 +235,10 @@ function gitmap {
     $env:GITMAP_COMMAND_WRAPPER = "1"
     & $real @args
     if ((Test-Path -LiteralPath $handoff) -and ((Get-Item -LiteralPath $handoff).Length -gt 0)) {
-      $target = (Get-Content -LiteralPath $handoff -Raw).Trim()
-      if ($target -and (Test-Path -LiteralPath $target)) {
-        Set-Location -LiteralPath $target
+      $target = [string](Get-Content -LiteralPath $handoff -Raw)
+      $target = $target.Trim()
+      if ($target -and (Test-Path -LiteralPath ([string]$target))) {
+        Set-Location -LiteralPath ([string]$target)
       }
     }
   }
