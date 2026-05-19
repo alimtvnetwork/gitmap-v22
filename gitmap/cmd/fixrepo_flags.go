@@ -176,3 +176,41 @@ func consumeFixRepoConfigArg(args []string, i int, out *fixRepoOptions) (int, bo
 
 	return 0, false, nil
 }
+
+// consumeFixRepoRestrictArg handles `--restrict <val>` / `-restrict <val>`
+// / `-r <val>` plus `=<val>` forms. Accepts `no-version` or its short
+// alias `nv` (case-insensitive). Returns (consumed, matched, err).
+func consumeFixRepoRestrictArg(args []string, i int, out *fixRepoOptions) (int, bool, error) {
+	a := args[i]
+	low := strings.ToLower(a)
+	bareLong := "--" + constants.FixRepoFlagRestrict
+	bareShort := "-" + constants.FixRepoFlagRestrict
+	bareTiny := "-" + constants.FixRepoFlagRestrictShort
+	if low == bareLong || low == bareShort || low == bareTiny {
+		if i+1 >= len(args) {
+			return 0, true, fmt.Errorf("%s requires a value (no-version|nv)", a)
+		}
+
+		return 2, true, applyRestrictValue(out, args[i+1])
+	}
+	for _, p := range []string{bareLong + "=", bareShort + "=", bareTiny + "="} {
+		if strings.HasPrefix(low, p) {
+			return 1, true, applyRestrictValue(out, a[len(p):])
+		}
+	}
+
+	return 0, false, nil
+}
+
+// applyRestrictValue normalizes the restrict value and sets the
+// matching option, or returns an error for unknown values.
+func applyRestrictValue(out *fixRepoOptions, v string) error {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case constants.FixRepoRestrictNoVersion, constants.FixRepoRestrictNoVersionShort:
+		out.restrictNoVersion = true
+
+		return nil
+	}
+
+	return fmt.Errorf("unknown --restrict value %q (want: no-version|nv)", v)
+}
