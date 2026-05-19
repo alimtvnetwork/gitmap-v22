@@ -44,6 +44,16 @@ const (
 	FixRepoModeFlag3      = "-3"
 	FixRepoModeFlag5      = "-5"
 	FixRepoConfigFileName = "fix-repo.config.json"
+
+	// FixRepoFlagRestrict (v5.39.0+) narrows the rewrite scope. The
+	// only currently-defined value is `no-version` (alias `nv`), which
+	// suppresses the v1→v2 bare-base sweep so ONLY `{base}-vN` tokens
+	// are rewritten. Long form `--restrict`, single-dash `-restrict`,
+	// and short alias `-r` are all accepted.
+	FixRepoFlagRestrict            = "restrict"
+	FixRepoFlagRestrictShort       = "r"
+	FixRepoRestrictNoVersion       = "no-version"
+	FixRepoRestrictNoVersionShort  = "nv"
 )
 
 // Fix-repo defaults.
