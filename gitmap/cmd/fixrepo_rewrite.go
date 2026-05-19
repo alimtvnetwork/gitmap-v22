@@ -46,13 +46,16 @@ func applyAllTargets(text, base string, current int, targets []int) (string, int
 		updated, added := applyOneTarget(text, base, n, current)
 		text = updated
 		total += added
-		// When the target is v1, the original repo on the remote may
-		// have shipped as a BARE `{base}` (no `-v1` suffix), so all
-		// downstream references read `img-pdf` rather than
-		// `img-pdf-v1`. Sweep those bare-base hits too with strict
-		// word-boundary guards so we never clobber substrings of
-		// other identifiers (or already-versioned `{base}-vN` forms).
-		if n == 1 {
+		// When the target is v1 AND we are bumping from v1→v2, the
+		// original repo on the remote may have shipped as a BARE
+		// `{base}` (no `-v1` suffix), so downstream references read
+		// `img-pdf` rather than `img-pdf-v1`. Sweep bare-base hits
+		// ONLY in this v1→v2 transition; for v3+ the bare token is
+		// almost certainly an unrelated identifier (binary name,
+		// package, brand) and must NOT be rewritten — clobbering it
+		// silently corrupts the repo. See spec
+		// 27-fix-repo-command.md §"Bare-base scope rule".
+		if n == 1 && current == 2 {
 			updated, added = applyBareBase(text, base, current)
 			text = updated
 			total += added
