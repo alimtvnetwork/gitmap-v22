@@ -1553,6 +1553,20 @@ gitmap replace all --audit                # report-only
 gitmap fix-repo --all --strict
 gitmap fr -5 --dry-run --verbose
 
+# Before/after — scope depends on current version
+# Inside gitmap-v2 (bare sweep ACTIVE on v1->v2)
+#   gitmap       -> gitmap-v2
+#   gitmap-v1    -> gitmap-v2
+#   gitmap.js    -> gitmap.js     (word-boundary)
+# Inside gitmap-v3+ (bare sweep SKIPPED)
+#   gitmap                 -> gitmap                 (binary/brand preserved)
+#   https://.../gitmap     -> https://.../gitmap     (URL preserved)
+#   gitmap-v1, gitmap-v2   -> gitmap-v<current>
+#   gitmap-v18             -> gitmap-v18             (negative-lookahead)
+# Force-suppress the bare sweep even on v1->v2:
+gitmap fix-repo -2 --restrict no-version
+gitmap fr       -2 -r nv
+
 # Clone + fix in one shot (versioned URLs auto-flatten)
 gitmap clone-fix-repo https://github.com/acme/myrepo-v13.git
 gitmap cfr            git@github.com:acme/myrepo-v13.git myrepo-fresh
