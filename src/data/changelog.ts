@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v5.39.0",
+    date: "2026-05-19",
+    subtitle: "fix-repo --restrict no-version (alias -r nv): skip the v1→v2 bare-base sweep on demand",
+    items: [
+      "**New flag.** `gitmap fix-repo --restrict no-version` (short: `gitmap fr -2 -r nv`) suppresses the v1→v2 bare-base rewrite so ONLY `{base}-vN` tokens are touched. Bare `{base}` occurrences are left alone even during a v1→v2 bump.",
+      "**Use case.** Projects whose first remote already used `{base}-v1` (no bare predecessor) can now bump v1→v2 without the bare-base sweep ever firing. Complements the v5.38.0 v3+ guard.",
+      "Flag forms accepted: `--restrict no-version`, `-restrict no-version`, `-r no-version`, `--restrict nv`, `-r nv`, plus `=value` forms (`-r=nv`). Unknown values exit with `E_BAD_FLAG` (6).",
+      "`gitmap help` now lists `--restrict <mode>` under 'Fix-repo flags:' with two copy-pasteable examples (full + short form).",
+      "Spec updated: `spec/04-generic-cli/27-fix-repo-command.md` has a new **Restrict modes (v5.39.0+)** section. New `applyAllTargetsR` / `rewriteFixRepoFileR` variants in `fixrepo_rewrite.go`; the original `applyAllTargets` / `rewriteFixRepoFile` signatures are preserved as restrict=false wrappers so existing tests stay green.",
+      "Pinned: README pinned-version block + version matrix moved to **v5.39.0**. Synced `gitmap/constants/constants.go` (`Version = \"5.39.0\"`) and `src/constants/index.ts` (`VERSION = \"v5.39.0\"`).",
+    ],
+  },
+  {
     version: "v5.38.0",
     date: "2026-05-19",
     subtitle: "fix-repo bare-base rewrite restricted to v1→v2 (no more corrupting bare `gitmap` at v3+)",
